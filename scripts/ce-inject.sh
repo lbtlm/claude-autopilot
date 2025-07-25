@@ -6,9 +6,13 @@
 
 set -e
 
-# 设置正确的编码环境
-export LANG=zh_CN.UTF-8
-export LC_ALL=zh_CN.UTF-8
+# 设置编码环境（如果支持的话）
+export LANG=${LANG:-C.UTF-8}
+if locale -a 2>/dev/null | grep -q "zh_CN.UTF-8"; then
+    export LC_ALL=zh_CN.UTF-8
+else
+    export LC_ALL=C.UTF-8
+fi
 
 # 显示使用帮助
 show_usage() {
@@ -48,9 +52,14 @@ show_usage() {
     echo ""
 }
 
-# 检查帮助参数
+# 检查帮助和版本参数
 if [[ "$1" == "-h" || "$1" == "--help" ]]; then
     show_usage
+    exit 0
+fi
+
+if [[ "$1" == "-v" || "$1" == "--version" ]]; then
+    echo "Claude Autopilot v2.1.0"
     exit 0
 fi
 
@@ -148,7 +157,7 @@ detect_project_type() {
     local path="$1"
     
     # 检查是否为gin_vue3全栈项目（既有Go又有Vue）
-    if ( [ -f "$path/go.mod" ] || [ -f "$path/backend/go.mod" ] ) && ( [ -f "$path/package.json" ] || [ -f "$path/frontend/package.json" ] ); then
+    if { [ -f "$path/go.mod" ] || [ -f "$path/backend/go.mod" ]; } && { [ -f "$path/package.json" ] || [ -f "$path/frontend/package.json" ]; }; then
         # 检查是否有gin依赖
         if grep -q "gin-gonic/gin" "$path/go.mod" "$path/backend/go.mod" 2>/dev/null; then
             echo "gin-vue3"
@@ -290,7 +299,7 @@ else
         echo "    16) rust-project       (Rust项目)"
         echo "    17) php-project        (PHP项目)"
         echo ""
-        read -p "请输入选项编号 (1-17): " choice
+        read -r -p "请输入选项编号 (1-17): " choice
         
         case "$choice" in
             1) PROJECT_TYPE="gin-microservice" ;;
@@ -344,7 +353,7 @@ if [ "$IS_NEW_PROJECT" = false ]; then
         echo "⚠️  项目健康度较低，建议在注入CE前先改善项目结构"
         echo "   查看详细评估报告: project_process/health-assessment-*.md"
         echo ""
-        read -p "是否继续注入CE系统？(y/N): " continue_injection
+        read -r -p "是否继续注入CE系统？(y/N): " continue_injection
         if [[ ! "$continue_injection" =~ ^[Yy]$ ]]; then
             echo "❌ 注入已取消。请改善项目健康度后重试。"
             exit 1

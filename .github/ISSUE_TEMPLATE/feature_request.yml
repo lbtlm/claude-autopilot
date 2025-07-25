@@ -1,0 +1,109 @@
+name: ✨ Feature Request / 功能请求
+description: 建议一个新功能或改进 / Suggest a new feature or improvement
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您的功能建议！
+        Thank you for your feature suggestion!
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题描述 / Problem Description
+      description: 您遇到了什么问题？这个功能解决什么问题？/ What problem does this feature solve?
+      placeholder: 我总是为...而感到沫丧 / I'm always frustrated when...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的解决方案 / Desired Solution
+      description: 您希望的解决方案是什么？/ What would you like to happen?
+      placeholder: 我希望能够... / I would like to be able to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案 / Alternatives Considered
+      description: 您考虑过哪些替代解决方案？/ What alternatives have you considered?
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 功能类别 / Feature Category
+      description: 这个功能属于哪个类别？/ What category does this feature belong to?
+      options:
+        - 项目配置 / Project Configuration
+        - 智能命令 / Smart Commands
+        - 项目类型支持 / Project Type Support
+        - 模板和工作流 / Templates & Workflows
+        - 文档和帮助 / Documentation & Help
+        - 性能优化 / Performance Optimization
+        - 安全增强 / Security Enhancement
+        - 用户体验 / User Experience
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 优先级 / Priority
+      description: 您认为这个功能的优先级如何？/ How would you rate the priority of this feature?
+      options:
+        - 低 / Low - 很好有，但不紧急 / Nice to have, not urgent
+        - 中 / Medium - 重要，但可以等待 / Important, but can wait
+        - 高 / High - 需要尽快实现 / Should be implemented soon
+        - 关键 / Critical - 阻塞工作流程 / Blocking workflow
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 使用场景 / Use Cases
+      description: 具体的使用场景和示例 / Specific use cases and examples
+      placeholder: |
+        1. 当我需要...时
+        2. 在...项目中
+        3. 期望能够...
+        
+        1. When I need to...
+        2. In ... projects
+        3. I expect to be able to...
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: 实现建议 / Implementation Suggestions
+      description: 如果您有实现想法，请分享 / If you have implementation ideas, please share
+      placeholder: 可能的实现方式... / Possible implementation approach...
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 贡献意愿 / Contribution Willingness
+      description: 您是否愿意为此功能做出贡献？/ Are you willing to contribute to this feature?
+      options:
+        - label: 我愿意帮助设计这个功能 / I'm willing to help design this feature
+        - label: 我愿意帮助实现这个功能 / I'm willing to help implement this feature
+        - label: 我愿意帮助测试这个功能 / I'm willing to help test this feature
+        - label: 我愿意帮助编写文档 / I'm willing to help write documentation
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 确认 / Confirmation
+      description: 提交前请确认 / Please confirm before submitting
+      options:
+        - label: 我已搜索过现有的issues，没有发现重复的功能请求 / I have searched existing issues and found no duplicate feature requests
+          required: true
+        - label: 这个功能与Claude Autopilot的目标一致 / This feature aligns with Claude Autopilot's goals
+          required: true

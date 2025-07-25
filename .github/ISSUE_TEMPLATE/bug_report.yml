@@ -1,0 +1,114 @@
+name: 🐛 Bug Report / Bug报告
+description: 报告一个Bug来帮助我们改进 / Report a bug to help us improve
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您花时间填写这个Bug报告！
+        Thanks for taking the time to fill out this bug report!
+
+  - type: input
+    id: version
+    attributes:
+      label: Claude Autopilot版本 / Version
+      description: 您使用的是哪个版本？/ What version are you using?
+      placeholder: "例如: v2.1.0"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug描述 / Bug Description
+      description: 清晰简洁地描述这个bug / A clear and concise description of what the bug is
+      placeholder: 告诉我们发生了什么... / Tell us what happened...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 重现步骤 / Steps to Reproduce
+      description: 重现该问题的步骤 / Steps to reproduce the behavior
+      placeholder: |
+        1. 执行命令 '...'
+        2. 设置配置 '...'
+        3. 看到错误
+        1. Run command '...'
+        2. Set configuration '...'
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为 / Expected Behavior
+      description: 您期望发生什么？/ What did you expect to happen?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为 / Actual Behavior
+      description: 实际发生了什么？/ What actually happened?
+    validations:
+      required: true
+
+  - type: dropdown
+    id: project-type
+    attributes:
+      label: 项目类型 / Project Type
+      description: 涉及哪种项目类型？/ What project type is involved?
+      options:
+        - Go微服务 / Go Microservice
+        - Vue3前端 / Vue3 Frontend
+        - React前端 / React Frontend  
+        - Python Web
+        - Node.js应用 / Node.js App
+        - Java项目 / Java Project
+        - Bash脚本 / Bash Scripts
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息 / Environment
+      description: 您的开发环境信息 / Your development environment
+      value: |
+        - OS: [例如 Ubuntu 20.04, macOS 12.0, Windows 11]
+        - Shell: [例如 bash, zsh, fish]
+        - Claude Code版本: [例如 v1.2.0]
+        - 其他相关工具版本:
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误日志 / Error Logs
+      description: 相关的错误日志或输出 / Relevant error logs or output
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 额外信息 / Additional Context
+      description: 任何其他有助于解决问题的信息 / Any other information that might help
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 确认 / Confirmation
+      description: 提交前请确认 / Please confirm before submitting
+      options:
+        - label: 我已搜索过现有的issues，没有发现重复的问题 / I have searched existing issues and found no duplicates
+          required: true
+        - label: 我已阅读了贡献指南 / I have read the contributing guidelines
+          required: true

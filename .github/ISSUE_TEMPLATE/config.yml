@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 讨论交流 / Discussions
+    url: https://github.com/lbtlm/claude-autopilot/discussions
+    about: 一般讨论、想法分享和社区交流 / General discussions, idea sharing and community interaction
+  - name: 📖 文档 / Documentation
+    url: https://github.com/lbtlm/claude-autopilot/blob/master/README.md
+    about: 查看项目文档和使用指南 / View project documentation and usage guide
+  - name: 🔧 故障排除 / Troubleshooting
+    url: https://github.com/lbtlm/claude-autopilot/blob/master/README.md#-故障排除--troubleshooting
+    about: 常见问题解决方案 / Common problem solutions

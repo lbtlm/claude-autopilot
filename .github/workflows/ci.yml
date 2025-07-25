@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  lint:
+    name: Lint Shell Scripts
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install ShellCheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+        
+    - name: Run ShellCheck
+      run: |
+        find . -name "*.sh" -type f | xargs shellcheck
+        
+  test:
+    name: Test Project Types
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up test environment
+      run: |
+        chmod +x scripts/setup.sh
+        chmod +x scripts/ce-inject.sh
+        
+    - name: Test basic functionality
+      run: |
+        ./scripts/ce-inject.sh --version
+        ./scripts/ce-inject.sh --help
+        
+    - name: Test project type detection
+      run: |
+        # Test project type templates exist
+        test -f claude-engine/project-types/go-general.md
+        test -f claude-engine/project-types/vue3-frontend.md
+        test -f claude-engine/project-types/python-web.md
+        test -f claude-engine/project-types/bash-scripts.md
+        
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check for sensitive information
+      run: |
+        # Check for potential sensitive information
+        if grep -r -E "(password|secret|key|token)" --exclude-dir=.git --exclude-dir=.github .; then
+          echo "⚠️ Found potential sensitive information"
+          exit 1
+        fi
+        echo "✅ No sensitive information found"
+        
+    - name: Check file permissions
+      run: |
+        # Check that shell scripts are executable
+        find . -name "*.sh" -type f | while read -r file; do
+          if [ ! -x "$file" ]; then
+            echo "❌ $file is not executable"
+            exit 1
+          fi
+        done
+        echo "✅ All shell scripts have correct permissions"

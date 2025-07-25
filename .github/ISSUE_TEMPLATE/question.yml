@@ -1,0 +1,104 @@
+name: ❓ 问题咨询 / Question
+description: 询问使用问题或寻求帮助 / Ask a question or seek help
+title: "[Question]: "
+labels: ["question", "help wanted"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        有问题？我们来帮助您！
+        Have a question? We're here to help!
+        
+        💡 在提问前，请先查看：
+        💡 Before asking, please check:
+        - [README文档 / README Documentation](https://github.com/lbtlm/claude-autopilot/blob/master/README.md)
+        - [英文文档 / English Documentation](https://github.com/lbtlm/claude-autopilot/blob/master/README-EN.md)
+        - [现有Issues / Existing Issues](https://github.com/lbtlm/claude-autopilot/issues)
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 问题类别 / Question Category
+      description: 您的问题属于哪个类别？/ What category does your question belong to?
+      options:
+        - 安装和设置 / Installation & Setup
+        - 项目配置 / Project Configuration
+        - 智能命令使用 / Smart Commands Usage
+        - 项目类型支持 / Project Type Support
+        - 错误排查 / Troubleshooting
+        - 最佳实践 / Best Practices
+        - 功能理解 / Feature Understanding
+        - 性能问题 / Performance Issues
+        - 其他 / Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: 问题描述 / Question Description
+      description: 详细描述您的问题 / Describe your question in detail
+      placeholder: 我想了解如何... / I want to understand how to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 使用场景 / Context
+      description: 您的使用场景和环境 / Your use case and environment
+      placeholder: |
+        - 项目类型: Go微服务
+        - 遇到情况: 配置项目时...
+        - 想要实现: ...
+        
+        - Project type: Go Microservice
+        - Situation: When configuring project...
+        - Want to achieve: ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已尝试的方法 / What You've Tried
+      description: 您已经尝试了哪些方法？/ What have you already tried?
+      placeholder: |
+        1. 尝试了命令 X
+        2. 查看了文档 Y
+        3. 搜索了...
+        
+        1. Tried command X
+        2. Checked documentation Y  
+        3. Searched for...
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息 / Environment
+      description: 您的开发环境信息 / Your development environment
+      value: |
+        - OS: [例如 Ubuntu 20.04, macOS 12.0, Windows 11]
+        - Shell: [例如 bash, zsh, fish]
+        - Claude Autopilot版本: [例如 v2.1.0]
+        - 项目类型: [例如 Go微服务, Vue3前端]
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息 / Additional Information
+      description: 任何其他有助于回答问题的信息 / Any other information that might help answer your question
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 确认 / Confirmation
+      description: 提交前请确认 / Please confirm before submitting
+      options:
+        - label: 我已阅读了README文档 / I have read the README documentation
+          required: true
+        - label: 我已搜索过现有的issues / I have searched existing issues
+          required: true
+        - label: 这个问题不是Bug报告或功能请求 / This is not a bug report or feature request
+          required: true

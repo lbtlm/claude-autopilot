@@ -566,7 +566,7 @@ chmod +x claude-engine/utils/*.sh
 **Q: 找不到ce-inject脚本**
 ```bash
 # 确保项目完整克隆
-git clone --recurse-submodules https://github.com/yourusername/claude-autopilot.git
+git clone --recurse-submodules https://github.com/lbtlm/claude-autopilot.git
 
 # 检查脚本是否存在
 ls -la scripts/ce-inject.sh

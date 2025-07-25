@@ -21,7 +21,8 @@ resolve_command_alias() {
     
     # 使用python解析JSON (更可靠的方法)
     if command -v python3 &> /dev/null; then
-        local resolved_command=$(python3 -c "
+        local resolved_command
+        resolved_command=$(python3 -c "
 import json
 try:
     with open('$ALIAS_CONFIG_PATH', 'r', encoding='utf-8') as f:
@@ -44,7 +45,8 @@ except Exception as e:
         echo "$resolved_command"
     else
         # 降级方案：使用简单的grep (不够准确但至少可用)
-        local resolved_command=$(grep -o "\"$input_command\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$ALIAS_CONFIG_PATH" | sed 's/.*: *"\([^"]*\)".*/\1/' | head -1)
+        local resolved_command
+        resolved_command=$(grep -o "\"$input_command\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" "$ALIAS_CONFIG_PATH" | sed 's/.*: *"\([^"]*\)".*/\1/' | head -1)
         if [ -n "$resolved_command" ]; then
             echo "$resolved_command"
         else

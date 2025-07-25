@@ -1,0 +1,266 @@
+[
+  // 自定义快捷键配置
+  
+  // 编辑器操作
+  {
+    "key": "cmd+d",
+    "command": "editor.action.duplicateSelection",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "ctrl+shift+k",
+    "command": "editor.action.deleteLines",
+    "when": "textInputFocus && !editorReadonly"
+  },
+  {
+    "key": "alt+up",
+    "command": "editor.action.moveLinesUpAction",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "alt+down",
+    "command": "editor.action.moveLinesDownAction",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  
+  // 多光标操作
+  {
+    "key": "cmd+alt+down",
+    "command": "editor.action.insertCursorBelow",
+    "when": "editorTextFocus"
+  },
+  {
+    "key": "cmd+alt+up",
+    "command": "editor.action.insertCursorAbove",
+    "when": "editorTextFocus"
+  },
+  
+  // 代码导航
+  {
+    "key": "cmd+p",
+    "command": "workbench.action.quickOpen"
+  },
+  {
+    "key": "cmd+shift+p",
+    "command": "workbench.action.showCommands"
+  },
+  {
+    "key": "cmd+t",
+    "command": "workbench.action.showAllSymbols"
+  },
+  {
+    "key": "cmd+r",
+    "command": "workbench.action.gotoSymbol"
+  },
+  
+  // 文件操作
+  {
+    "key": "cmd+n",
+    "command": "explorer.newFile",
+    "when": "explorerViewletVisible && filesExplorerFocus && !inputFocus"
+  },
+  {
+    "key": "cmd+shift+n",
+    "command": "explorer.newFolder",
+    "when": "explorerViewletVisible && filesExplorerFocus && !inputFocus"
+  },
+  
+  // 面板和侧边栏
+  {
+    "key": "cmd+b",
+    "command": "workbench.action.toggleSidebarVisibility"
+  },
+  {
+    "key": "cmd+j",
+    "command": "workbench.action.togglePanel"
+  },
+  {
+    "key": "cmd+shift+e",
+    "command": "workbench.view.explorer"
+  },
+  {
+    "key": "ctrl+shift+g",
+    "command": "workbench.view.scm"
+  },
+  {
+    "key": "cmd+shift+d",
+    "command": "workbench.view.debug"
+  },
+  {
+    "key": "cmd+shift+x",
+    "command": "workbench.view.extensions"
+  },
+  
+  // 终端操作
+  {
+    "key": "ctrl+`",
+    "command": "workbench.action.terminal.toggleTerminal"
+  },
+  {
+    "key": "cmd+shift+c",
+    "command": "workbench.action.terminal.openNativeConsole"
+  },
+  {
+    "key": "ctrl+shift+`",
+    "command": "workbench.action.terminal.new"
+  },
+  
+  // Git操作
+  {
+    "key": "cmd+shift+g g",
+    "command": "git.openChange",
+    "when": "editorTextFocus && gitOpenRepositoryCount != 0"
+  },
+  {
+    "key": "cmd+shift+g s",
+    "command": "git.stage",
+    "when": "gitOpenRepositoryCount != 0"
+  },
+  {
+    "key": "cmd+shift+g c",
+    "command": "git.commit",
+    "when": "gitOpenRepositoryCount != 0"
+  },
+  {
+    "key": "cmd+shift+g p",
+    "command": "git.push",
+    "when": "gitOpenRepositoryCount != 0"
+  },
+  
+  // 搜索和替换
+  {
+    "key": "cmd+f",
+    "command": "actions.find"
+  },
+  {
+    "key": "cmd+shift+f",
+    "command": "workbench.action.findInFiles"
+  },
+  {
+    "key": "cmd+shift+h",
+    "command": "workbench.action.replaceInFiles"
+  },
+  
+  // 代码格式化
+  {
+    "key": "shift+alt+f",
+    "command": "editor.action.formatDocument",
+    "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly && !inCompositeEditor"
+  },
+  {
+    "key": "cmd+k cmd+f",
+    "command": "editor.action.formatSelection",
+    "when": "editorHasDocumentFormattingProvider && editorTextFocus && !editorReadonly"
+  },
+  
+  // 调试操作
+  {
+    "key": "f5",
+    "command": "workbench.action.debug.start",
+    "when": "debuggersAvailable && !inDebugMode"
+  },
+  {
+    "key": "shift+f5",
+    "command": "workbench.action.debug.stop",
+    "when": "inDebugMode"
+  },
+  {
+    "key": "f9",
+    "command": "editor.debug.action.toggleBreakpoint",
+    "when": "debuggersAvailable && editorTextFocus"
+  },
+  {
+    "key": "f10",
+    "command": "workbench.action.debug.stepOver",
+    "when": "debugState == 'stopped'"
+  },
+  {
+    "key": "f11",
+    "command": "workbench.action.debug.stepInto",
+    "when": "debugState == 'stopped'"
+  },
+  {
+    "key": "shift+f11",
+    "command": "workbench.action.debug.stepOut",
+    "when": "debugState == 'stopped'"
+  },
+  
+  // 代码折叠
+  {
+    "key": "cmd+k cmd+0",
+    "command": "editor.foldAll",
+    "when": "editorTextFocus && foldingEnabled"
+  },
+  {
+    "key": "cmd+k cmd+j",
+    "command": "editor.unfoldAll",
+    "when": "editorTextFocus && foldingEnabled"
+  },
+  
+  // 注释操作
+  {
+    "key": "cmd+/",
+    "command": "editor.action.commentLine",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  {
+    "key": "shift+alt+a",
+    "command": "editor.action.blockComment",
+    "when": "editorTextFocus && !editorReadonly"
+  },
+  
+  // 选择操作
+  {
+    "key": "cmd+l",
+    "command": "expandLineSelection",
+    "when": "textInputFocus"
+  },
+  {
+    "key": "cmd+shift+l",
+    "command": "editor.action.selectHighlights",
+    "when": "editorFocus"
+  },
+  
+  // 工作区操作
+  {
+    "key": "cmd+k cmd+w",
+    "command": "workbench.action.closeAllEditors"
+  },
+  {
+    "key": "cmd+k cmd+s",
+    "command": "workbench.action.openGlobalKeybindings"
+  },
+  {
+    "key": "cmd+,",
+    "command": "workbench.action.openSettings"
+  },
+  
+  // 标签页操作
+  {
+    "key": "cmd+1",
+    "command": "workbench.action.openEditorAtIndex1"
+  },
+  {
+    "key": "cmd+2",
+    "command": "workbench.action.openEditorAtIndex2"
+  },
+  {
+    "key": "cmd+3",
+    "command": "workbench.action.openEditorAtIndex3"
+  },
+  {
+    "key": "cmd+4",
+    "command": "workbench.action.openEditorAtIndex4"
+  },
+  {
+    "key": "cmd+5",
+    "command": "workbench.action.openEditorAtIndex5"
+  },
+  
+  // 禁用的快捷键（避免冲突）
+  {
+    "key": "cmd+w",
+    "command": "-workbench.action.closeWindow",
+    "when": "!editorIsOpen && !multipleEditorGroups"
+  }
+]

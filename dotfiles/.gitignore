@@ -1,0 +1,77 @@
+# dotfiles仓库忽略文件
+
+# 操作系统生成的文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# 临时文件
+*.tmp
+*.temp
+*~
+
+# 备份文件
+*.backup
+*.bak
+*.old
+
+# 日志文件
+*.log
+logs/
+
+# 本地配置文件（包含敏感信息）
+*.local
+.env
+.env.local
+.secrets
+
+# VSCode工作区文件
+*.code-workspace
+
+# 编译产物
+node_modules/
+dist/
+build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# 测试覆盖率
+coverage/
+.nyc_output
+
+# 包管理器锁文件（在dotfiles中保留，供参考）
+# package-lock.json
+# yarn.lock
+
+# IDE配置（项目特定）
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Git配置文件中的敏感部分
+.gitconfig.local
+
+# SSH密钥
+*.key
+*.pem
+id_rsa
+id_dsa
+*.pub
+
+# GPG密钥
+*.gpg
+*.asc
+
+# 其他敏感文件
+*.p12
+*.crt
+*.cer

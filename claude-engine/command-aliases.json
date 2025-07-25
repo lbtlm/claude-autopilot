@@ -1,0 +1,53 @@
+{
+  "command_aliases": {
+    "智能功能开发": "smart-feature-dev",
+    "smart-feature-dev": "smart-feature-dev",
+    "智能Bug修复": "smart-bugfix", 
+    "smart-bugfix": "smart-bugfix",
+    "智能代码重构": "smart-code-refactor",
+    "smart-code-refactor": "smart-code-refactor",
+    "加载全局上下文": "load-global-context",
+    "load-global-context": "load-global-context",
+    "智能工作总结提交": "smart-work-summary",
+    "smart-work-summary": "smart-work-summary",
+    "智能部署推送Docker": "smart-docker-deploy",
+    "smart-docker-deploy": "smart-docker-deploy",
+    "智能项目结构校验": "smart-structure-validation",
+    "smart-structure-validation": "smart-structure-validation",
+    "智能项目规划": "smart-project-planning",
+    "smart-project-planning": "smart-project-planning",
+    "项目状态分析": "project-status-analysis",
+    "project-status-analysis": "project-status-analysis",
+    "清理残余文件": "cleanup-project",
+    "cleanup-project": "cleanup-project",
+    "提交github": "commit-github",
+    "commit-github": "commit-github"
+  },
+  "workflow_aliases": {
+    "智能Docker部署推送": "smart-docker-deployment",
+    "smart-docker-deployment": "smart-docker-deployment",
+    "智能代码实现": "smart-code-implementation", 
+    "smart-code-implementation": "smart-code-implementation",
+    "智能工作总结提交": "smart-work-summary",
+    "smart-work-summary": "smart-work-summary",
+    "智能方案生成": "smart-solution-generation",
+    "smart-solution-generation": "smart-solution-generation",
+    "智能需求分析": "smart-requirement-analysis",
+    "smart-requirement-analysis": "smart-requirement-analysis",
+    "智能项目结构校验": "smart-structure-validation",
+    "smart-structure-validation": "smart-structure-validation",
+    "智能项目规划": "smart-project-planning",
+    "smart-project-planning": "smart-project-planning"
+  },
+  "template_aliases": {
+    "智能PRP基础模板": "smart-prp-base-template",
+    "smart-prp-base-template": "smart-prp-base-template",
+    "轻量级CLAUDE模板": "lightweight-claude-template",
+    "lightweight-claude-template": "lightweight-claude-template"
+  },
+  "description": "Command alias mapping system for Claude Autopilot 2.1",
+  "version": "2.1.0",
+  "supports_bilingual": true,
+  "default_language": "chinese",
+  "fallback_language": "english"
+}

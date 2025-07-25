@@ -1,0 +1,63 @@
+# 零源码泄露的多阶段Dockerfile - FastAPI+Vue3全栈项目
+# 前端构建阶段
+FROM node:18-alpine AS frontend-builder
+
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+COPY frontend/ .
+RUN npm run build
+
+# 后端构建阶段
+FROM python:3.11-alpine AS backend-builder
+
+# 安装必要的构建工具
+RUN apk add --no-cache gcc musl-dev libffi-dev
+
+WORKDIR /backend
+COPY backend/requirements.txt .
+RUN pip install --user --no-cache-dir -r requirements.txt
+
+# 复制后端源码
+COPY backend/ .
+
+# 运行阶段 - 零源码，最小化镜像
+FROM python:3.11-alpine
+
+# 创建非root用户
+RUN addgroup -g 1000 appgroup && adduser -D -u 1000 -G appgroup appuser
+
+# 复制Python依赖
+COPY --from=backend-builder /root/.local /home/appuser/.local
+
+# 复制前端构建产物到static目录
+COPY --from=frontend-builder /frontend/dist /app/static
+
+# 复制后端应用文件（只复制必要的运行时文件）
+COPY --from=backend-builder /backend/app /app/app
+COPY --from=backend-builder /backend/alembic* /app/ 2>/dev/null || true
+COPY --from=backend-builder /backend/main.py /app/
+
+# 设置工作目录和权限
+WORKDIR /app
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+# 更新PATH
+ENV PATH=/home/appuser/.local/bin:$PATH
+
+# 环境变量配置
+ENV HOST=0.0.0.0
+ENV PORT=8080
+ENV PYTHONPATH=/app
+ENV PYTHONUNBUFFERED=1
+
+# 动态暴露端口
+EXPOSE $PORT
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get(f'http://localhost:{os.environ.get(\"PORT\", 8080)}/health')" || exit 1
+
+# 启动应用
+CMD ["python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]

@@ -1,0 +1,72 @@
+# 零源码泄露的多阶段Dockerfile - Gin+Vue3全栈项目
+
+# 阶段1: 构建Vue3前端
+FROM node:20-alpine AS frontend-builder
+
+# 设置工作目录
+WORKDIR /frontend-build
+
+# 复制前端依赖文件
+COPY frontend/package*.json ./
+RUN npm ci --only=production
+
+# 复制前端源码并构建
+COPY frontend/ ./
+RUN npm run build
+
+# 阶段2: 构建Gin后端
+FROM golang:1.24-alpine AS backend-builder
+
+# 安装必要的构建工具
+RUN apk add --no-cache git ca-certificates tzdata
+
+# 设置工作目录
+WORKDIR /backend-build
+
+# 复制后端依赖文件
+COPY backend/go.mod backend/go.sum ./
+RUN go mod download
+
+# 复制后端源码进行构建
+COPY backend/ ./
+
+# 构建静态链接的二进制文件
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+    go build -a -installsuffix cgo \
+    -ldflags '-extldflags "-static" -s -w -X main.Version=$(git describe --tags --always --dirty 2>/dev/null || echo "dev") -X main.BuildTime=$(date +%Y-%m-%d_%H:%M:%S)' \
+    -o app main.go
+
+# 阶段3: 运行阶段 - 零源码，最小化镜像
+FROM alpine:3.18
+
+# 安装运行时依赖
+RUN apk add --no-cache ca-certificates tzdata
+
+# 创建非root用户
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# 设置工作目录
+WORKDIR /app
+
+# 复制构建产物
+COPY --from=backend-builder /backend-build/app /app/server
+COPY --from=frontend-builder /frontend-build/dist /app/static
+
+# 设置权限
+RUN chown -R appuser:appgroup /app
+USER appuser
+
+# 环境变量配置
+ENV HOST=0.0.0.0
+ENV PORT=8080
+ENV STATIC_PATH=/app/static
+
+# 动态暴露端口
+EXPOSE $PORT
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD wget --no-verbose --tries=1 --spider http://localhost:$PORT/health || exit 1
+
+# 启动应用
+ENTRYPOINT ["/app/server"]

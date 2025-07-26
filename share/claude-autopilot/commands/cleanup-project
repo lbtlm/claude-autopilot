@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Claude Code命令 - cleanup-project
+# 版本: 2.1.0  
+# 符合GNU标准的CLI命令架构
+
+set -euo pipefail
+
+# 获取脚本目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+
+# 调用全局lib目录下的实际实现
+exec "$PROJECT_ROOT/lib/cleanup-project.sh" "$@"

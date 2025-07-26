@@ -24,3 +24,6 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Project process files
+project_process/*

@@ -1,0 +1,31 @@
+{
+  "project_name": "test-global-path",
+  "project_type": "rust-project",
+  "tech_stack": "rust-project",
+  "global_ce_path": "/Users/samsmith/GolandProjects/global_rules",
+  "auto_load_context": true,
+  "enabled_workflows": [
+    "smart-feature-dev",
+    "smart-bugfix",
+    "smart-code-refactor"
+  ],
+  "enabled_commands": [
+    "load-global-context",
+    "smart-feature-dev",
+    "smart-bugfix", 
+    "smart-code-refactor",
+    "project-status-analysis",
+    "cleanup-project",
+    "commit-github"
+  ],
+  "quality_gates": {
+    "lint_command": "make lint",
+    "test_command": "make test",
+    "typecheck_command": "make typecheck",
+    "security_command": "make security-scan"
+  },
+  "memory_context": "rust-project_test-global-path",
+  "ce_version": "2.0.0",
+  "created_at": "2025-07-26 18:17:19",
+  "last_sync": "2025-07-26 18:17:19"
+}

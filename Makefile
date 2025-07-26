@@ -11,12 +11,12 @@ CONFIG_DIR := $(INSTALL_PREFIX)/share/claude-ce
 LIB_DIR := $(INSTALL_PREFIX)/lib/claude-ce
 
 # 脚本文件
-MAIN_SCRIPT := scripts/ce-inject.sh
+MAIN_SCRIPT := bin/claude-autopilot
 SETUP_SCRIPT := scripts/setup.sh
 QUICK_SETUP_SCRIPT := scripts/quick-setup.sh
 SCRIPTS := $(wildcard scripts/*/*.sh)
-UTILS := $(wildcard claude-engine/utils/*.sh)
-CONFIGS := $(wildcard claude-engine/**/*.md)
+UTILS := $(wildcard lib/*.sh)
+CONFIGS := $(wildcard share/claude-autopilot/**/*.md)
 
 # 默认目标
 .PHONY: all
@@ -27,8 +27,8 @@ all: lint test
 lint:
 	@echo "🔍 运行ShellCheck代码检查..."
 	@if command -v shellcheck >/dev/null 2>&1; then \
-		shellcheck scripts/ce-inject.sh && \
-		shellcheck claude-engine/utils/*.sh && \
+		shellcheck bin/claude-autopilot && \
+		shellcheck lib/*.sh && \
 		shellcheck scripts/*.sh scripts/*/*.sh test*.sh 2>/dev/null || true; \
 		echo "✅ ShellCheck检查完成"; \
 	else \
@@ -36,16 +36,21 @@ lint:
 		echo "   安装方法: sudo apt install shellcheck  # Ubuntu/Debian"; \
 		echo "           brew install shellcheck      # macOS"; \
 		echo "💡 进行基本语法检查..."; \
-		bash -n scripts/ce-inject.sh && echo "✅ ce-inject.sh语法检查通过"; \
-		for file in claude-engine/utils/*.sh scripts/*.sh; do bash -n "$$file" && echo "✅ $$file语法检查通过"; done; \
+		bash -n bin/claude-autopilot && echo "✅ claude-autopilot语法检查通过"; \
+		for file in lib/*.sh scripts/*.sh; do bash -n "$$file" && echo "✅ $$file语法检查通过"; done; \
 	fi
 
 # 运行测试
 .PHONY: test
 test:
 	@echo "🧪 运行项目测试..."
-	@echo "⚠️  当前版本暂无自动化测试，建议手动验证功能"
-	@echo "✅ 可以使用 make quick-setup 测试基本功能"
+	@if [ -f tests/run-tests.sh ]; then \
+		chmod +x tests/run-tests.sh && \
+		./tests/run-tests.sh; \
+	else \
+		echo "⚠️  测试框架未找到，建议手动验证功能"; \
+		echo "✅ 可以使用 make quick-setup 测试基本功能"; \
+	fi
 
 # 安装到系统
 .PHONY: install
@@ -54,7 +59,7 @@ install: lint
 	@mkdir -p $(BIN_DIR) $(CONFIG_DIR) $(LIB_DIR)
 	@cp -r bin/* $(BIN_DIR)/
 	@cp -r scripts/* $(BIN_DIR)/
-	@cp -r claude-engine $(CONFIG_DIR)/
+	@cp -r share/claude-autopilot $(CONFIG_DIR)/
 	@chmod +x $(BIN_DIR)/*
 	@echo "✅ 安装完成"
 	@echo "   可执行文件: $(BIN_DIR)/"
@@ -99,15 +104,15 @@ dev-setup:
 	@echo "🔧 设置开发环境..."
 	@git config core.hooksPath .githooks
 	@chmod +x .githooks/*
-	@chmod +x scripts/ce-inject.sh
-	@chmod +x claude-engine/utils/*.sh
+	@chmod +x bin/claude-autopilot
+	@chmod +x lib/*.sh
 	@echo "✅ 开发环境设置完成"
 
 # 项目健康度检查
 .PHONY: health-check
 health-check:
 	@echo "🏥 项目健康度检查..."
-	@./scripts/ce-inject.sh . --health-only 2>/dev/null || echo "需要先设置CE_INSTALL_PATH环境变量"
+	@./bin/claude-autopilot . --health-only 2>/dev/null || echo "需要先设置CE_INSTALL_PATH环境变量"
 	@echo "✅ 健康度检查完成"
 
 # 交互式配置（新手友好）
@@ -128,7 +133,7 @@ quick-setup:
 .PHONY: self-inject
 self-inject:
 	@echo "🎯 对当前项目应用智能注入..."
-	@./scripts/ce-inject.sh . bash-scripts
+	@./bin/claude-autopilot . bash-scripts
 	@echo "✅ 智能注入完成"
 
 # 快速注入到指定项目 - 自动检测项目类型
@@ -141,7 +146,7 @@ inject:
 		exit 1; \
 	fi
 	@echo "🎯 智能注入到项目: $(PROJECT)"
-	@./scripts/ce-inject.sh "$(PROJECT)"
+	@./bin/claude-autopilot "$(PROJECT)"
 	@echo "✅ 注入完成"
 
 # 快速注入到指定项目并指定类型
@@ -160,7 +165,7 @@ inject-type:
 		exit 1; \
 	fi
 	@echo "🎯 注入项目: $(PROJECT) (类型: $(TYPE))"
-	@./scripts/ce-inject.sh "$(PROJECT)" "$(TYPE)"
+	@./bin/claude-autopilot "$(PROJECT)" "$(TYPE)"
 	@echo "✅ 注入完成"
 
 # 批量注入到多个项目
@@ -177,7 +182,7 @@ inject-batch:
 		if [ -d "$$project" ]; then \
 			echo ""; \
 			echo "📂 处理项目: $$project"; \
-			./scripts/ce-inject.sh "$$project" || echo "⚠️ 跳过: $$project"; \
+			./bin/claude-autopilot "$$project" || echo "⚠️ 跳过: $$project"; \
 		fi; \
 	done
 	@echo "✅ 批量注入完成"

@@ -1,5 +1,8 @@
 # Claude Autopilot 2.1 - 智能开发环境自动配置工具
 
+**🌐 语言版本 | Language Versions**
+- [简体中文](README.md) | [繁體中文](README-TW.md) | [English](README-EN.md)
+
 > 🛩️ 让Claude驾驶您的开发过程，一键式AI协作开发环境配置，支持多种项目类型的自动化智能配置
 
 ## 📋 项目简介
@@ -154,7 +157,7 @@ cd claude-autopilot
 
 # 手动设置执行权限 (Git Bash环境)
 chmod +x scripts/*.sh
-chmod +x claude-engine/utils/*.sh
+chmod +x lib/*.sh
 ```
 
 **注意事项:**
@@ -227,7 +230,7 @@ make dev-setup                                       # 设置开发环境
 # 核心脚本
 ./scripts/setup.sh                                  # 交互式配置
 ./scripts/quick-setup.sh                            # 快速配置
-./scripts/ce-inject.sh [项目路径] [项目类型]        # 核心注入脚本
+./bin/claude-autopilot [项目路径] [项目类型]        # 核心注入脚本
 
 # 专用工具
 ./scripts/quality-check/health-check.sh             # 健康检查
@@ -338,18 +341,194 @@ your-project/
 
 配置完成后，在Claude Code中可以使用以下智能命令：
 
-```bash
-# 核心开发流程
-/智能功能开发 <功能描述>        OR  /smart-feature-dev <feature description>
-/智能Bug修复 <问题描述>         OR  /smart-bugfix <problem description>
-/智能代码重构 <重构目标>       OR  /smart-code-refactor <refactor target>
+## 🚀 **核心开发命令** - 日常开发必备
 
-# 辅助工具
-/加载全局上下文               OR  /load-global-context
-/项目状态分析                OR  /project-status-analysis
-/清理残余文件                OR  /cleanup-project
-/提交github                  OR  /commit-github
+### 1. 🔧 智能功能开发 `/智能功能开发` 或 `/smart-feature-dev`
+
+**快速开始新功能开发，从设计到实现的完整流程**
+
+```bash
+# 基础用法
+/智能功能开发 用户登录功能
+/smart-feature-dev user authentication system
+
+# 详细用法
+/智能功能开发 创建一个Vue3的用户管理界面，包含增删改查功能
+/智能功能开发 实现JWT认证的API端点，支持登录、注册、刷新token
 ```
+
+**功能特点:**
+- ✨ 自动分析功能需求并拆解任务
+- 🏗️ 生成符合项目架构的代码结构
+- 🧪 创建相关测试文件
+- 📝 更新项目文档
+
+---
+
+### 2. 🐛 智能Bug修复 `/智能Bug修复` 或 `/smart-bugfix`
+
+**快速诊断和修复代码问题，支持多种编程语言**
+
+```bash
+# 基础用法
+/智能Bug修复 页面加载缓慢
+/smart-bugfix API返回500错误
+
+# 详细用法
+/智能Bug修复 Vue组件渲染异常，控制台显示Cannot read property of undefined
+/智能Bug修复 数据库连接超时，查询时间超过30秒
+```
+
+**功能特点:**
+- 🔍 智能代码分析和问题定位
+- 🛠️ 提供多种修复方案
+- 📊 性能优化建议
+- 🧪 验证修复效果
+
+---
+
+### 3. 🔄 智能代码重构 `/智能代码重构` 或 `/smart-code-refactor`
+
+**基于最佳实践的代码重构和优化**
+
+```bash
+# 基础用法
+/智能代码重构 优化数据库查询
+/smart-code-refactor improve component structure
+
+# 详细用法
+/智能代码重构 将类组件重构为函数组件，使用Hooks
+/智能代码重构 优化API接口，实现缓存和分页功能
+```
+
+**功能特点:**
+- 🎯 遵循代码最佳实践
+- ⚡ 性能优化建议
+- 🧹 代码清理和规范化
+- 📚 架构改进建议
+
+---
+
+## 🛠️ **项目管理命令** - 项目维护工具
+
+### 4. 🔄 加载全局上下文 `/加载全局上下文` 或 `/load-global-context`
+
+**重新加载Claude Autopilot环境和项目上下文**
+
+```bash
+# 基础用法
+/加载全局上下文
+/load-global-context
+
+# 强制刷新模式
+/加载全局上下文 --force-refresh
+/load-global-context --force-refresh
+```
+
+**使用场景:**
+- 🔧 更新项目配置后
+- 🚨 命令无法识别时
+- 📝 修改项目类型后
+- 🔄 环境变更后
+
+---
+
+### 5. 📊 项目状态分析 `/项目状态分析` 或 `/project-status-analysis`
+
+**全面分析项目健康度和技术债务**
+
+```bash
+# 基础用法
+/项目状态分析
+/project-status-analysis
+
+# 详细分析
+/项目状态分析 --detailed
+/project-status-analysis --with-suggestions
+```
+
+**分析内容:**
+- 🏗️ 项目架构合规性
+- 📦 依赖版本和安全性
+- 🧪 测试覆盖率分析
+- 📝 文档完整性检查
+- 🚀 性能瓶颈识别
+
+---
+
+### 6. 🧹 项目清理重组 `/清理残余文件` 或 `/cleanup-project`
+
+**智能清理项目文件，符合GNU编码标准**
+
+```bash
+# 完整交互式清理
+/清理残余文件
+/cleanup-project
+
+# 自动模式（跳过确认）
+/cleanup-project --auto
+
+# 预览模式（仅显示不执行）
+/cleanup-project --dry-run
+
+# 深度清理模式
+/cleanup-project --deep
+```
+
+**清理内容:**
+- 🗑️ 临时文件和缓存
+- 📁 非标准目录结构
+- 🔄 重复和冗余文件
+- 🏗️ 不符合项目架构的文件
+- 💾 备份旧文件（安全清理）
+
+---
+
+### 7. 📤 提交到GitHub `/提交github` 或 `/commit-github`
+
+**智能Git提交，生成规范的提交信息**
+
+```bash
+# 基础用法
+/提交github
+/commit-github
+
+# 指定提交类型
+/commit-github --type feat
+/commit-github --type fix
+```
+
+**功能特点:**
+- 📝 自动分析代码变更
+- 🎯 生成符合Conventional Commits规范的提交信息
+- 🔍 代码质量检查
+- 🚀 自动推送到远程仓库
+
+---
+
+## 💡 **使用技巧**
+
+### 🎯 **快速上手**
+1. **新项目开发**: 使用 `/智能功能开发` 快速创建功能
+2. **问题解决**: 遇到bug时使用 `/智能Bug修复`
+3. **代码优化**: 定期使用 `/智能代码重构` 改进代码质量
+4. **项目维护**: 使用 `/项目状态分析` 和 `/清理残余文件` 保持项目健康
+
+### 🔄 **命令组合使用**
+```bash
+# 完整开发流程示例
+1. /项目状态分析                    # 分析项目当前状态
+2. /智能功能开发 新功能需求          # 开发新功能  
+3. /智能代码重构 优化新功能          # 重构和优化
+4. /清理残余文件                   # 清理临时文件
+5. /提交github                     # 提交代码
+```
+
+### 📝 **最佳实践**
+- ✅ 详细描述需求，获得更准确的结果
+- ✅ 定期使用项目维护命令
+- ✅ 组合使用多个命令完成复杂任务
+- ✅ 利用参数选项定制命令行为
 
 ### 🚀 开始使用
 
@@ -380,7 +559,7 @@ claude-autopilot/
 │   ├── 📁 quality-check/         # 质量检查工具
 │   └── 📁 autopilot/                 # Autopilot 2.1 智能系统
 │
-├── 📁 claude-engine/             # 智能上下文引擎
+├── 📁 share/claude-autopilot/    # 智能上下文引擎
 │   ├── 📁 project-types/         # 项目类型模板 (关键配置)
 │   │   ├── gin-microservice.md   # Go微服务配置
 │   │   ├── vue3-frontend.md      # Vue3前端配置
@@ -408,7 +587,7 @@ claude-autopilot/
 - **quick-setup.sh** - 快速配置，适合熟练用户，命令行直接使用
 - **ce-inject.sh** - 核心注入引擎，所有配置逻辑的实现
 
-#### 2. **claude-engine/ - 智能引擎核心**
+#### 2. **share/claude-autopilot/ - 智能引擎核心**
 - **project-types/** - 各种项目类型的配置模板和最佳实践
 - **commands/** - 智能命令链接，支持中英文命令
 - **utils/** - 核心工具函数，提供可复用的功能模块
@@ -431,7 +610,7 @@ claude-autopilot/
 2️⃣ 脚本直接调用 (更多控制)
    ./scripts/setup.sh            # 交互式菜单
    ./scripts/quick-setup.sh      # 快速配置
-   ./scripts/ce-inject.sh        # 直接引擎调用
+   ./bin/claude-autopilot        # 直接引擎调用
 
 3️⃣ 系统安装 (全局使用)
    sudo make install             # 安装到系统
@@ -451,7 +630,7 @@ claude-autopilot/
 
 如果您需要支持新的项目类型：
 
-1. 在 `claude-engine/project-types/` 目录下创建新的配置文件
+1. 在 `share/claude-autopilot/project-types/` 目录下创建新的配置文件
 2. 参考现有配置文件的格式（推荐复制类似项目类型进行修改）
 3. 重新运行配置脚本
 
@@ -459,11 +638,11 @@ claude-autopilot/
 
 ```bash
 # 1. 创建新的项目类型配置
-cp claude-engine/project-types/gin-microservice.md \
-   claude-engine/project-types/my-custom-type.md
+cp share/claude-autopilot/project-types/gin-microservice.md \
+   share/claude-autopilot/project-types/my-custom-type.md
 
 # 2. 编辑配置文件，修改项目描述和模板
-vim claude-engine/project-types/my-custom-type.md
+vim share/claude-autopilot/project-types/my-custom-type.md
 
 # 3. 测试新配置
 ./scripts/quick-setup.sh /path/to/test/project my-custom-type
@@ -530,7 +709,7 @@ export CE_TEMPLATE_DIR="/custom/templates"
    ```bash
    # 在Git Bash中手动设置权限
    find scripts/ -name "*.sh" -exec chmod +x {} \;
-   find claude-engine/utils/ -name "*.sh" -exec chmod +x {} \;
+   find lib/ -name "*.sh" -exec chmod +x {} \;
    ```
 
 3. **Git配置优化 (一次性设置)**:
@@ -539,7 +718,7 @@ export CE_TEMPLATE_DIR="/custom/templates"
    git config core.filemode false
    git update-index --chmod=+x scripts/setup.sh
    git update-index --chmod=+x scripts/quick-setup.sh
-   git update-index --chmod=+x scripts/ce-inject.sh
+   git update-index --chmod=+x bin/claude-autopilot
    ```
 
 #### **Q: 脚本在PowerShell中无法运行**
@@ -560,7 +739,7 @@ make dev-setup
 
 # 或者手动设置
 chmod +x scripts/*.sh
-chmod +x claude-engine/utils/*.sh
+chmod +x lib/*.sh
 ```
 
 **Q: 找不到ce-inject脚本**
@@ -569,7 +748,7 @@ chmod +x claude-engine/utils/*.sh
 git clone --recurse-submodules https://github.com/lbtlm/claude-autopilot.git
 
 # 检查脚本是否存在
-ls -la scripts/ce-inject.sh
+ls -la bin/claude-autopilot
 ```
 
 **Q: 项目类型检测失败**
@@ -578,7 +757,7 @@ ls -la scripts/ce-inject.sh
 ./scripts/quick-setup.sh /path/to/project your-project-type
 
 # 查看支持的项目类型
-ls claude-engine/project-types/
+ls share/claude-autopilot/project-types/
 ```
 
 ### 🔧 通用问题解决
@@ -717,11 +896,11 @@ chmod +x scripts/*.sh
    git clone https://github.com/lbtlm/claude-autopilot.git
    
    # 2. 创建新的项目类型模板
-   cp claude-engine/project-types/gin-microservice.md \
-      claude-engine/project-types/your-new-type.md
+   cp share/claude-autopilot/project-types/gin-microservice.md \
+      share/claude-autopilot/project-types/your-new-type.md
    
    # 3. 根据您的技术栈调整模板内容
-   vim claude-engine/project-types/your-new-type.md
+   vim share/claude-autopilot/project-types/your-new-type.md
    
    # 4. 提交Pull Request
    ```

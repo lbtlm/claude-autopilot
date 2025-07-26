@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "project_name": "test-final-fix",
+  "default_language": "chinese",
+  "supported_languages": ["chinese", "english"],
+  "ui_strings": {
+    "chinese": {
+      "welcome": "欢迎使用智能Claude Autopilot 2.1",
+      "project_initialized": "项目初始化完成",
+      "health_check": "项目健康度检查",
+      "deployment_ready": "部署就绪",
+      "commands": {
+        "智能功能开发": "一键式完整功能开发",
+        "智能Bug修复": "智能问题诊断和修复",
+        "智能代码重构": "基于最佳实践的智能重构",
+        "加载全局上下文": "重新加载全局上下文和经验",
+        "智能工作总结提交": "智能工作总结和规范提交",
+        "智能部署推送Docker": "智能Docker部署推送",
+        "智能项目结构校验": "项目结构完整性校验",
+        "智能项目规划": "智能项目规划和需求分析"
+      },
+      "status": {
+        "success": "成功",
+        "error": "错误",
+        "warning": "警告",
+        "info": "信息",
+        "in_progress": "进行中",
+        "completed": "已完成"
+      },
+      "health_levels": {
+        "excellent": "优秀",
+        "good": "良好", 
+        "fair": "一般",
+        "poor": "较差",
+        "critical": "危险"
+      }
+    },
+    "english": {
+      "welcome": "Welcome to Intelligent Claude Autopilot 2.1",
+      "project_initialized": "Project initialization completed",
+      "health_check": "Project health assessment",
+      "deployment_ready": "Deployment ready",
+      "commands": {
+        "smart-feature-dev": "One-click complete feature development",
+        "smart-bugfix": "Intelligent problem diagnosis and repair",
+        "smart-code-refactor": "Smart refactoring based on best practices",
+        "load-global-context": "Reload global context and experience",
+        "smart-work-summary": "Intelligent work summary and standard submission",
+        "smart-docker-deploy": "Smart Docker deployment push",
+        "smart-structure-validation": "Project structure integrity validation",
+        "smart-project-planning": "Smart project planning and requirements analysis"
+      },
+      "status": {
+        "success": "Success",
+        "error": "Error", 
+        "warning": "Warning",
+        "info": "Info",
+        "in_progress": "In Progress",
+        "completed": "Completed"
+      },
+      "health_levels": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "fair": "Fair", 
+        "poor": "Poor",
+        "critical": "Critical"
+      }
+    }
+  },
+  "command_mappings": {
+    "智能功能开发": "smart-feature-dev",
+    "smart-feature-dev": "smart-feature-dev",
+    "智能Bug修复": "smart-bugfix",
+    "smart-bugfix": "smart-bugfix",
+    "智能代码重构": "smart-code-refactor",
+    "smart-code-refactor": "smart-code-refactor",
+    "加载全局上下文": "load-global-context",
+    "load-global-context": "load-global-context",
+    "智能工作总结提交": "smart-work-summary",
+    "smart-work-summary": "smart-work-summary",
+    "智能部署推送Docker": "smart-docker-deploy",
+    "smart-docker-deploy": "smart-docker-deploy",
+    "智能项目结构校验": "smart-structure-validation", 
+    "smart-structure-validation": "smart-structure-validation",
+    "智能项目规划": "smart-project-planning",
+    "smart-project-planning": "smart-project-planning"
+  },
+  "created_at": "2025-07-26T18:12:30+08:00",
+  "notes": "Bilingual support for Claude Autopilot 2.1 system"
+}

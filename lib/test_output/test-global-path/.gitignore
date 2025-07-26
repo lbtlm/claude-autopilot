@@ -1,0 +1,54 @@
+# 依赖目录
+node_modules/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.env
+
+# 构建输出
+dist/
+build/
+*.o
+*.so
+*.exe
+
+# IDE和编辑器文件
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+logs/
+Logs/
+
+# 临时文件
+*.tmp
+*.temp
+*.cache
+
+# 测试覆盖报告
+coverage/
+.coverage
+.nyc_output/
+.pytest_cache/
+
+# 部署相关
+.env.production
+.env.staging
+
+# 项目特定忽略文件
+# 在此添加项目特定的忽略规则

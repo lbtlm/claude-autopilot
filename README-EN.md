@@ -1,5 +1,8 @@
 # Claude Autopilot 2.1 - Intelligent Development Environment Configuration Tool
 
+**🌐 Language Versions**
+- [简体中文](README.md) | [繁體中文](README-TW.md) | [English](README-EN.md)
+
 > 🛩️ Let Claude Drive Your Development - One-click AI collaborative development environment setup, supporting multiple project types with automated intelligent configuration
 
 ## 📋 Project Overview
@@ -154,7 +157,7 @@ cd claude-autopilot
 
 # Manually set execution permissions (Git Bash environment)
 chmod +x scripts/*.sh
-chmod +x claude-engine/utils/*.sh
+chmod +x lib/*.sh
 ```
 
 **Notes:**
@@ -227,7 +230,7 @@ make dev-setup                                       # Setup development environ
 # Core scripts
 ./scripts/setup.sh                                  # Interactive configuration
 ./scripts/quick-setup.sh                            # Quick configuration
-./scripts/ce-inject.sh [project_path] [project_type]        # Core injection script
+./bin/claude-autopilot [project_path] [project_type]        # Core injection script
 
 # Specialized tools
 ./scripts/quality-check/health-check.sh             # Health check
@@ -338,18 +341,204 @@ your-project/
 
 After configuration, you can use the following smart commands in Claude Code:
 
-```bash
-# Core development workflow
-/smart-feature-dev <feature description>     # Complete feature development
-/smart-bugfix <problem description>          # Intelligent problem diagnosis and fix
-/smart-code-refactor <refactor target>       # Best practice-based refactoring
+## 🚀 **Core Development Commands** - Daily Development Essentials
 
-# Auxiliary tools
-/load-global-context                         # Reload CE environment
-/project-status-analysis                     # Project health analysis
-/cleanup-project                             # Clean project files
-/commit-github                               # Git commit and push
+### 1. 🔧 Smart Feature Development `/smart-feature-dev` or Chinese `/智能功能开发`
+
+**Quickly start new feature development with complete workflow from design to implementation**
+
+```bash
+# Basic usage
+/smart-feature-dev user authentication system
+/智能功能开发 用户登录功能
+
+# Detailed usage
+/smart-feature-dev Create a Vue3 user management interface with CRUD operations
+/smart-feature-dev Implement JWT authentication API endpoints with login, register, refresh token
 ```
+
+**Key Features:**
+
+- ✨ Automatically analyze requirements and break down tasks
+- 🏗️ Generate code structure following project architecture
+- 🧪 Create related test files
+- 📝 Update project documentation
+
+---
+
+### 2. 🐛 Smart Bug Fix `/smart-bugfix` or Chinese `/智能Bug修复`
+
+**Quickly diagnose and fix code issues, supporting multiple programming languages**
+
+```bash
+# Basic usage
+/smart-bugfix Page loading slowly
+/智能Bug修复 API返回500错误
+
+# Detailed usage
+/smart-bugfix Vue component rendering error, console shows Cannot read property of undefined
+/smart-bugfix Database connection timeout, queries taking over 30 seconds
+```
+
+**Key Features:**
+
+- 🔍 Intelligent code analysis and issue location
+- 🛠️ Provide multiple fix solutions
+- 📊 Performance optimization suggestions
+- 🧪 Verify fix effectiveness
+
+---
+
+### 3. 🔄 Smart Code Refactor `/smart-code-refactor` or Chinese `/智能代码重构`
+
+**Code refactoring and optimization based on best practices**
+
+```bash
+# Basic usage
+/smart-code-refactor optimize database queries
+/智能代码重构 优化数据库查询
+
+# Detailed usage
+/smart-code-refactor Convert class components to function components using Hooks
+/smart-code-refactor Optimize API endpoints, implement caching and pagination
+```
+
+**Key Features:**
+
+- 🎯 Follow code best practices
+- ⚡ Performance optimization suggestions
+- 🧹 Code cleanup and standardization
+- 📚 Architecture improvement recommendations
+
+---
+
+## 🛠️ **Project Management Commands** - Project Maintenance Tools
+
+### 4. 🔄 Load Global Context `/load-global-context` or Chinese `/加载全局上下文`
+
+**Reload Claude Autopilot environment and project context**
+
+```bash
+# Basic usage
+/load-global-context
+/加载全局上下文
+
+# Force refresh mode
+/load-global-context --force-refresh
+/加载全局上下文 --force-refresh
+```
+
+**Use Cases:**
+
+- 🔧 After updating project configuration
+- 🚨 When commands are not recognized
+- 📝 After modifying project type
+- 🔄 After environment changes
+
+---
+
+### 5. 📊 Project Status Analysis `/project-status-analysis` or Chinese `/项目状态分析`
+
+**Comprehensive analysis of project health and technical debt**
+
+```bash
+# Basic usage
+/project-status-analysis
+/项目状态分析
+
+# Detailed analysis
+/project-status-analysis --detailed
+/项目状态分析 --with-suggestions
+```
+
+**Analysis Content:**
+
+- 🏗️ Project architecture compliance
+- 📦 Dependency versions and security
+- 🧪 Test coverage analysis
+- 📝 Documentation completeness check
+- 🚀 Performance bottleneck identification
+
+---
+
+### 6. 🧹 Project Cleanup `/cleanup-project` or Chinese `/清理残余文件`
+
+**Intelligent project file cleanup, compliant with GNU coding standards**
+
+```bash
+# Complete interactive cleanup
+/cleanup-project
+/清理残余文件
+
+# Automatic mode (skip confirmations)
+/cleanup-project --auto
+
+# Preview mode (show only, don't execute)
+/cleanup-project --dry-run
+
+# Deep cleanup mode
+/cleanup-project --deep
+```
+
+**Cleanup Content:**
+
+- 🗑️ Temporary files and cache
+- 📁 Non-standard directory structures
+- 🔄 Duplicate and redundant files
+- 🏗️ Files not compliant with project architecture
+- 💾 Backup old files (safe cleanup)
+
+---
+
+### 7. 📤 Commit to GitHub `/commit-github` or Chinese `/提交github`
+
+**Smart Git commit with standard commit messages**
+
+```bash
+# Basic usage
+/commit-github
+/提交github
+
+# Specify commit type
+/commit-github --type feat
+/commit-github --type fix
+```
+
+**Key Features:**
+
+- 📝 Automatically analyze code changes
+- 🎯 Generate Conventional Commits compliant messages
+- 🔍 Code quality checks
+- 🚀 Automatic push to remote repository
+
+---
+
+## 💡 **Usage Tips**
+
+### 🎯 **Quick Start**
+
+1. **New Project Development**: Use `/smart-feature-dev` to quickly create features
+2. **Problem Solving**: Use `/smart-bugfix` when encountering bugs
+3. **Code Optimization**: Regularly use `/smart-code-refactor` to improve code quality
+4. **Project Maintenance**: Use `/project-status-analysis` and `/cleanup-project` to keep project healthy
+
+### 🔄 **Command Combination Usage**
+
+```bash
+# Complete development workflow example
+1. /project-status-analysis          # Analyze current project status
+2. /smart-feature-dev new feature    # Develop new feature
+3. /smart-code-refactor optimize     # Refactor and optimize
+4. /cleanup-project                  # Clean temporary files
+5. /commit-github                    # Commit code
+```
+
+### 📝 **Best Practices**
+
+- ✅ Describe requirements in detail for more accurate results
+- ✅ Regularly use project maintenance commands
+- ✅ Combine multiple commands for complex tasks
+- ✅ Use parameter options to customize command behavior
 
 ### 🚀 Start Using
 
@@ -380,7 +569,7 @@ claude-autopilot/
 │   ├── 📁 quality-check/         # Quality check tools
 │   └── 📁 autopilot/                 # Autopilot 2.1 intelligent system
 │
-├── 📁 claude-engine/             # Intelligent context engine
+├── 📁 share/claude-autopilot/             # Intelligent context engine
 │   ├── 📁 project-types/         # Project type templates (key configuration)
 │   │   ├── gin-microservice.md   # Go microservice configuration
 │   │   ├── vue3-frontend.md      # Vue3 frontend configuration
@@ -406,7 +595,7 @@ claude-autopilot/
 - **quick-setup.sh** - Quick configuration, suitable for experienced users, direct command line usage
 - **ce-inject.sh** - Core injection engine, implementation of all configuration logic
 
-#### 2. **claude-engine/ - Intelligent Engine Core**
+#### 2. **share/claude-autopilot/ - Intelligent Engine Core**
 - **project-types/** - Configuration templates and best practices for various project types
 - **commands/** - Smart command links, supporting Chinese and English commands
 - **utils/** - Core utility functions, providing reusable functional modules
@@ -429,7 +618,7 @@ claude-autopilot/
 2️⃣ Direct Script Calls (more control)
    ./scripts/setup.sh            # Interactive menu
    ./scripts/quick-setup.sh      # Quick configuration
-   ./scripts/ce-inject.sh        # Direct engine call
+   ./bin/claude-autopilot        # Direct engine call
 
 3️⃣ System Installation (global usage)
    sudo make install             # Install to system
@@ -449,7 +638,7 @@ claude-autopilot/
 
 If you need to support new project types:
 
-1. Create new configuration files in the `claude-engine/project-types/` directory
+1. Create new configuration files in the `share/claude-autopilot/project-types/` directory
 2. Refer to existing configuration file formats (recommend copying similar project types for modification)
 3. Re-run configuration scripts
 
@@ -457,11 +646,11 @@ If you need to support new project types:
 
 ```bash
 # 1. Create new project type configuration
-cp claude-engine/project-types/gin-microservice.md \
-   claude-engine/project-types/my-custom-type.md
+cp share/claude-autopilot/project-types/gin-microservice.md \
+   share/claude-autopilot/project-types/my-custom-type.md
 
 # 2. Edit configuration file, modify project description and templates
-vim claude-engine/project-types/my-custom-type.md
+vim share/claude-autopilot/project-types/my-custom-type.md
 
 # 3. Test new configuration
 ./scripts/quick-setup.sh /path/to/test/project my-custom-type
@@ -528,7 +717,7 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
    ```bash
    # Manually set permissions in Git Bash
    find scripts/ -name "*.sh" -exec chmod +x {} \;
-   find claude-engine/utils/ -name "*.sh" -exec chmod +x {} \;
+   find share/claude-autopilot/utils/ -name "*.sh" -exec chmod +x {} \;
    ```
 
 3. **Git Configuration Optimization (One-time Setup)**:
@@ -558,7 +747,7 @@ make dev-setup
 
 # Or set manually
 chmod +x scripts/*.sh
-chmod +x claude-engine/utils/*.sh
+chmod +x lib/*.sh
 ```
 
 **Q: Cannot find ce-inject script**
@@ -576,7 +765,7 @@ ls -la scripts/ce-inject.sh
 ./scripts/quick-setup.sh /path/to/project your-project-type
 
 # View supported project types
-ls claude-engine/project-types/
+ls share/claude-autopilot/project-types/
 ```
 
 ### 🔧 General Problem Solving
@@ -715,11 +904,11 @@ We welcome community contributions of new project templates! If you want to add 
    git clone https://github.com/lbtlm/claude-autopilot.git
    
    # 2. Create new project type template
-   cp claude-engine/project-types/gin-microservice.md \
-      claude-engine/project-types/your-new-type.md
+   cp share/claude-autopilot/project-types/gin-microservice.md \
+      share/claude-autopilot/project-types/your-new-type.md
    
    # 3. Adjust template content according to your tech stack
-   vim claude-engine/project-types/your-new-type.md
+   vim share/claude-autopilot/project-types/your-new-type.md
    
    # 4. Submit Pull Request
    ```

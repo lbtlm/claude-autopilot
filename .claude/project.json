@@ -1,0 +1,31 @@
+{
+  "project_name": "global_rules",
+  "project_type": "bash-scripts",
+  "tech_stack": "bash-scripts + Make + Tests",
+  "global_ce_path": "/Users/samsmith/GolandProjects/global_rules",
+  "auto_load_context": true,
+  "enabled_workflows": [
+    "smart-feature-dev",
+    "smart-bugfix",
+    "smart-code-refactor"
+  ],
+  "enabled_commands": [
+    "load-global-context",
+    "smart-feature-dev",
+    "smart-bugfix", 
+    "smart-code-refactor",
+    "project-status-analysis",
+    "cleanup-project",
+    "commit-github"
+  ],
+  "quality_gates": {
+    "lint_command": "make lint",
+    "test_command": "make test",
+    "typecheck_command": "make typecheck",
+    "security_command": "make security-scan"
+  },
+  "memory_context": "bash-scripts_global_rules",
+  "ce_version": "2.0.0",
+  "created_at": "2025-07-26 13:13:10",
+  "last_sync": "2025-07-26 13:13:10"
+}

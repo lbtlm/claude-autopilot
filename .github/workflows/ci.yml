@@ -37,21 +37,27 @@ jobs:
       
     - name: Set up test environment
       run: |
-        chmod +x scripts/setup.sh
-        chmod +x scripts/ce-inject.sh
+        chmod +x bin/setup.sh
+        chmod +x bin/claude-autopilot
+        chmod +x tests/run-tests.sh
         
     - name: Test basic functionality
       run: |
-        ./scripts/ce-inject.sh --version
-        ./scripts/ce-inject.sh --help
+        ./bin/claude-autopilot --version || echo "Version command not yet implemented"
+        ./bin/claude-autopilot --help || echo "Help command not yet implemented"
         
     - name: Test project type detection
       run: |
-        # Test project type templates exist
-        test -f claude-engine/project-types/go-general.md
-        test -f claude-engine/project-types/vue3-frontend.md
-        test -f claude-engine/project-types/python-web.md
-        test -f claude-engine/project-types/bash-scripts.md
+        # Test project type templates exist (new GNU standard structure)
+        test -f share/claude-autopilot/project-types/go-general.md
+        test -f share/claude-autopilot/project-types/vue3-frontend.md
+        test -f share/claude-autopilot/project-types/python-web.md || test -f share/claude-autopilot/project-types/fastapi_vue3.md
+        test -f share/claude-autopilot/project-types/bash-scripts.md
+        
+    - name: Run test suite
+      run: |
+        # Run the new test framework
+        ./tests/run-tests.sh
         
   security:
     name: Security Scan

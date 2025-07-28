@@ -5,8 +5,9 @@
 
 # 动态检测路径
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_CE_PATH="$(dirname "$SCRIPT_DIR")"
-ALIAS_CONFIG_PATH="$GLOBAL_CE_PATH/command-aliases.json"
+CLAUDE_AUTOPILOT_ROOT="$(dirname "$SCRIPT_DIR")"
+GLOBAL_CE_PATH="$CLAUDE_AUTOPILOT_ROOT/share/claude-autopilot"
+ALIAS_CONFIG_PATH="$CLAUDE_AUTOPILOT_ROOT/etc/command-aliases.json"
 
 # 解析命令别名
 resolve_command_alias() {

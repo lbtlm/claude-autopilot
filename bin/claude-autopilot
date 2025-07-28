@@ -17,19 +17,26 @@ fi
 # 显示使用帮助
 show_usage() {
     echo "📖 使用说明:"
-    echo "   $0 [项目路径] [项目类型]"
+    echo "   $0 [--target_dir <路径>] [--project_type <类型>] [--owner <所有者>]"
     echo ""
     echo "📋 参数说明:"
-    echo "   项目路径    - 可选，默认为当前目录"
-    echo "   项目类型    - 新项目必需，现有项目可选（会覆盖智能检测）"
+    echo "   --target_dir  - 目标目录 (可选，默认当前目录)"
+    echo "                   绝对路径: /path/to/project"
+    echo "                   相对路径: my-project (在当前目录下创建)"
+    echo "   --project_type - 项目类型 (可选，不提供则交互选择)"
+    echo "   --owner       - 项目所有者 (可选，不提供则自动生成)"
     echo ""
-    echo "🆕 新项目模式 (空目录):"
-    echo "   必须指定项目类型，例如:"
-    echo "   $0 /path/to/new/project gin-microservice"
+    echo "🎯 使用示例:"
+    echo "   $0                                    # 完全交互式"
+    echo "   $0 --target_dir ./my-app              # 指定目录"
+    echo "   $0 --project_type bash-scripts        # 指定类型"
+    echo "   $0 --owner 'YoumiSam'                 # 指定所有者"
+    echo "   $0 --target_dir /opt/app --project_type gin-microservice --owner 'Team'  # 完整参数"
     echo ""
-    echo "📁 现有项目模式 (非空目录):"
-    echo "   自动智能检测项目类型，例如:"
-    echo "   $0 /path/to/existing/project"
+    echo "🆕 项目模式说明:"
+    echo "   - 空目录/不存在目录: 新建项目模式"
+    echo "   - 现有Claude项目: 注入更新模式 (保护现有结构)"
+    echo "   - 非空非项目目录: 需要用户确认"
     echo ""
     echo "🏷️ 支持的项目类型:"
     echo "   gin-microservice  - Go + Gin微服务"
@@ -53,125 +60,140 @@ show_usage() {
     echo ""
 }
 
-# 检查帮助和版本参数
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-    show_usage
-    exit 0
-fi
+# 生成UUID7格式的project_id
+generate_uuid7() {
+    # UUID7 使用时间戳作为前缀，确保时间顺序性
+    # 格式: xxxxxxxx-xxxx-7xxx-yxxx-xxxxxxxxxxxx
+    # 其中前48位是毫秒时间戳，版本号为7
+    
+    # 获取当前时间戳（毫秒）
+    if command -v python3 >/dev/null 2>&1; then
+        # 使用Python生成更精确的UUID7
+        python3 -c "
+import time
+import random
+import uuid
 
-if [[ "$1" == "-v" || "$1" == "--version" ]]; then
-    echo "Claude Autopilot v2.1.0"
-    exit 0
-fi
+# 获取当前时间戳（毫秒）
+timestamp_ms = int(time.time() * 1000)
 
-echo "🛩️ Claude Autopilot 2.1 智能项目配置器"
-echo "================================================"
+# 转换为48位十六进制
+timestamp_hex = format(timestamp_ms, '012x')
 
-# 跨平台realpath函数
-get_realpath() {
-    if command -v realpath >/dev/null 2>&1; then
-        realpath "$1"
+# 生成随机部分
+rand_a = random.randint(0, 0xfff)  # 12位随机数
+rand_b = random.randint(0, 0x3fff) | 0x8000  # 14位随机数，设置variant位
+rand_c = random.randint(0, 0xffffffffffff)  # 48位随机数
+
+# 构造UUID7
+uuid7 = f'{timestamp_hex[:8]}-{timestamp_hex[8:]}-7{rand_a:03x}-{rand_b:04x}-{rand_c:012x}'
+print(uuid7)
+"
     else
-        # 兼容macOS等没有realpath的系统
-        cd "$(dirname "$1")" && echo "$(pwd)/$(basename "$1")"
+        # 回退方案：使用shell生成类似UUID7的格式
+        timestamp=$(date +%s%3N)  # 获取毫秒时间戳
+        timestamp_hex=$(printf "%012x" $timestamp)
+        
+        # 生成随机部分
+        rand1=$(printf "%03x" $((RANDOM % 4096)))
+        rand2=$(printf "%04x" $((RANDOM % 16384 + 32768)))  # 设置variant位
+        rand3=$(printf "%012x" $((RANDOM * RANDOM * RANDOM % 281474976710656)))
+        
+        echo "${timestamp_hex:0:8}-${timestamp_hex:8:4}-7${rand1}-${rand2}-${rand3}"
     fi
 }
 
-# 动态检测脚本路径
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_RULES_PATH="$(dirname "$SCRIPT_DIR")"
-GLOBAL_CE_PATH="$GLOBAL_RULES_PATH/share/claude-autopilot"
-SCRIPT_VERSION="2.0.0"
-TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
-
-# 导出全局路径变量供子脚本使用
-export GLOBAL_RULES_PATH
-export GLOBAL_CE_PATH
-
-# 调试信息
-echo "🔍 全局路径调试:"
-echo "   GLOBAL_RULES_PATH: $GLOBAL_RULES_PATH"
-echo "   GLOBAL_CE_PATH: $GLOBAL_CE_PATH"
-
-# 获取项目路径和类型
-if [ -n "$1" ]; then
-    if [ ! -d "$1" ]; then
-        echo "❌ 错误: 指定的项目路径不存在或不是目录: $1"
-        echo ""
-        show_usage
-        exit 1
+# 项目状态检测函数
+detect_project_status() {
+    local target_dir="$1"
+    
+    # 1. 检查目录是否存在
+    if [ ! -d "$target_dir" ]; then
+        echo "CREATE_NEW"
+        return
     fi
-    PROJECT_PATH=$(get_realpath "$1")
-else
-    PROJECT_PATH=$(pwd)
-fi
-
-# 获取项目类型参数 (可选)
-FORCE_PROJECT_TYPE="$2"
-
-echo "📂 项目路径: $PROJECT_PATH"
-echo "🔧 Claude Autopilot路径: $GLOBAL_CE_PATH"
-echo ""
-
-# 检测目录是否为空（除了隐藏文件）
-is_directory_empty() {
-    local dir="$1"
-    # 检查是否存在非隐藏文件或目录
-    if [ -z "$(find "$dir" -maxdepth 1 -not -path "$dir" -not -name ".*" -print -quit)" ]; then
-        return 0  # 目录为空
-    else
-        return 1  # 目录非空
+    
+    # 2. 检查是否为空目录 (忽略隐藏文件)
+    if [ -z "$(find "$target_dir" -maxdepth 1 -not -path "$target_dir" -not -name ".*" -print -quit)" ]; then
+        echo "CREATE_NEW"
+        return
     fi
+    
+    # 3. 检查是否为现有项目 (检测项目标识文件)
+    if [ -f "$target_dir/CLAUDE.md" ] || [ -f "$target_dir/.claude/project.json" ]; then
+        echo "INJECT_EXISTING"
+        return
+    fi
+    
+    # 4. 非空非项目目录
+    echo "NON_EMPTY_NON_PROJECT"
 }
 
-# 新项目检测逻辑
-IS_NEW_PROJECT=false
-if is_directory_empty "$PROJECT_PATH"; then
-    IS_NEW_PROJECT=true
-    echo "🆕 检测到新项目（空目录）"
+# 验证项目类型有效性
+validate_project_type() {
+    local project_type="$1"
+    local valid_types="gin-microservice gin-vue3 go-desktop go-general vue3-frontend vue2-frontend react-frontend nextjs-frontend nodejs-general python-desktop django python-general fastapi_vue3 bash-scripts java-maven java-gradle rust-project php-project"
+    
+    echo "$valid_types" | grep -wq "$project_type"
+}
 
-    # 新项目必须提供项目类型参数
-    if [ -z "$FORCE_PROJECT_TYPE" ]; then
-        echo "❌ 错误: 新项目必须指定项目类型参数"
-        echo ""
-        show_usage
-        exit 1
-    fi
+# 显示有效项目类型列表
+show_valid_project_types() {
+    echo "📋 有效的项目类型:"
+    echo "   1) gin-microservice    (Go + Gin微服务)"
+    echo "   2) gin-vue3           (Go + Gin + Vue3全栈)"
+    echo "   3) go-desktop         (Go桌面应用)"
+    echo "   4) go-general         (Go通用项目)"
+    echo "   5) vue3-frontend      (Vue3前端项目)"
+    echo "   6) vue2-frontend      (Vue2前端项目)"
+    echo "   7) react-frontend     (React前端项目)"
+    echo "   8) nextjs-frontend    (Next.js前端项目)"
+    echo "   9) nodejs-general     (Node.js通用项目)"
+    echo "   10) python-desktop     (Python桌面应用)"
+    echo "   11) django             (Django Web应用)"
+    echo "   12) python-general     (Python通用项目)"
+    echo "   13) fastapi_vue3       (FastAPI + Vue3全栈)"
+    echo "   14) bash-scripts       (Bash脚本项目)"
+    echo "   15) java-maven         (Java Maven项目)"
+    echo "   16) java-gradle        (Java Gradle项目)"
+    echo "   17) rust-project       (Rust项目)"
+    echo "   18) php-project        (PHP项目)"
+}
 
-    # 验证项目类型参数的有效性
-    valid_types="gin-microservice gin-vue3 go-desktop go-general vue3-frontend vue2-frontend react-frontend nextjs-frontend nodejs-general python-desktop django python-general fastapi_vue3 bash-scripts java-maven java-gradle rust-project php-project"
-    if ! echo "$valid_types" | grep -wq "$FORCE_PROJECT_TYPE"; then
-        echo "❌ 错误: 无效的项目类型 '$FORCE_PROJECT_TYPE'"
-        echo ""
-        show_usage
-        exit 1
-    fi
-
-    echo "   🎯 指定项目类型: $FORCE_PROJECT_TYPE"
-else
-    echo "📁 检测到现有项目（非空目录）"
-    if [ -n "$FORCE_PROJECT_TYPE" ]; then
-        echo "   ⚠️ 警告: 现有项目将使用智能检测，忽略强制类型参数"
-        FORCE_PROJECT_TYPE=""  # 清空强制类型，使用智能检测
-    fi
-fi
-echo ""
-
-# 检查Claude Autopilot是否存在
-if [ ! -d "$GLOBAL_CE_PATH" ]; then
-    echo "❌ 错误: 全局Context Engine路径不存在"
-    echo "   路径: $GLOBAL_CE_PATH"
-    echo "   请先运行Claude Autopilot系统安装"
-    exit 1
-fi
-
-# 加载工具脚本
-source "$GLOBAL_RULES_PATH/lib/project-health-assessment.sh"
-source "$GLOBAL_RULES_PATH/lib/alias-resolver.sh"
-source "$GLOBAL_RULES_PATH/lib/project-structure-creator.sh"
-source "$GLOBAL_RULES_PATH/lib/deployment-strategy-manager.sh"
-source "$GLOBAL_RULES_PATH/lib/internationalization-manager.sh"
-
+# 交互式选择项目类型
+interactive_select_project_type() {
+    echo ""
+    show_valid_project_types
+    echo ""
+    
+    while true; do
+        read -r -p "请输入选项编号 (1-18): " choice
+        
+        case "$choice" in
+            1) echo "gin-microservice"; return ;;
+            2) echo "gin-vue3"; return ;;
+            3) echo "go-desktop"; return ;;
+            4) echo "go-general"; return ;;
+            5) echo "vue3-frontend"; return ;;
+            6) echo "vue2-frontend"; return ;;
+            7) echo "react-frontend"; return ;;
+            8) echo "nextjs-frontend"; return ;;
+            9) echo "nodejs-general"; return ;;
+            10) echo "python-desktop"; return ;;
+            11) echo "django"; return ;;
+            12) echo "python-general"; return ;;
+            13) echo "fastapi_vue3"; return ;;
+            14) echo "bash-scripts"; return ;;
+            15) echo "java-maven"; return ;;
+            16) echo "java-gradle"; return ;;
+            17) echo "rust-project"; return ;;
+            18) echo "php-project"; return ;;
+            *)
+                echo "❌ 无效选择，请输入 1-18 之间的数字"
+                ;;
+        esac
+    done
+}
 
 # 检测技术栈
 detect_tech_stack() {
@@ -228,162 +250,503 @@ detect_tech_stack() {
     echo "$tech_stack"
 }
 
-# 项目类型选择
-echo "🔍 项目配置..."
-if [ "$IS_NEW_PROJECT" = true ]; then
-    echo "   🎯 新项目类型: $FORCE_PROJECT_TYPE"
-    PROJECT_TYPE="$FORCE_PROJECT_TYPE"
-else
-    # 检查是否有CLAUDE.md文件包含项目类型信息
-    doc_project_type=""
-    if [ -f "$PROJECT_PATH/CLAUDE.md" ]; then
-        doc_project_type=$(grep -i "项目类型\|技术栈" "$PROJECT_PATH/CLAUDE.md" | head -1 | grep -o -E "(gin-vue3|gin-microservice|go-desktop|go-general|vue3-frontend|vue2-frontend|react-frontend|nextjs-frontend|nodejs-general|python-desktop|django|python-general|fastapi_vue3|bash-scripts|java-maven|java-gradle|rust-project|php-project)" | head -1)
-    fi
-
-    if [ -n "$doc_project_type" ]; then
-        echo "   📖 从CLAUDE.md中读取到项目类型: $doc_project_type"
-        echo "   ❓ 是否使用此项目类型? (y/n)"
-        read -r use_doc_type
-        if [[ "$use_doc_type" =~ ^[Yy]$ ]]; then
-            PROJECT_TYPE="$doc_project_type"
+# 加载必要的库函数
+load_required_libraries() {
+    echo "📚 加载必要的库函数..."
+    
+    # 检查并加载核心库文件
+    local lib_files=(
+        "project-health-assessment.sh"
+        "project-structure-creator.sh" 
+        "deployment-strategy-manager.sh"
+        "internationalization-manager.sh"
+        "alias-resolver.sh"
+    )
+    
+    for lib_file in "${lib_files[@]}"; do
+        local lib_path="$GLOBAL_RULES_PATH/lib/$lib_file"
+        if [ -f "$lib_path" ]; then
+            echo "   ✅ 加载: $lib_file"
+            source "$lib_path" 2>/dev/null || {
+                echo "   ⚠️ 警告: 无法加载 $lib_file，跳过"
+            }
         else
-            PROJECT_TYPE=""  # 清空以便进入手动选择
+            echo "   ⚠️ 警告: 未找到 $lib_file，跳过"
         fi
-    fi
+    done
+    
+    echo "   ✅ 库函数加载完成"
+}
 
-    # 如果没有项目类型，进入手动选择
-    if [ -z "$PROJECT_TYPE" ]; then
-        echo "   📋 请手动选择项目类型："
-        echo "     1) gin-microservice    (Go + Gin微服务)"
-        echo "     2) gin-vue3           (Go + Gin + Vue3全栈)"
-        echo "     3) go-desktop         (Go桌面应用)"
-        echo "     4) go-general         (Go通用项目)"
-        echo "     5) vue3-frontend      (Vue3前端项目)"
-        echo "     6) vue2-frontend      (Vue2前端项目)"
-        echo "     7) react-frontend     (React前端项目)"
-        echo "     8) nextjs-frontend    (Next.js前端项目)"
-        echo "     9) nodejs-general     (Node.js通用项目)"
-        echo "    10) python-desktop     (Python桌面应用)"
-        echo "    11) django             (Django Web应用)"
-        echo "    12) python-general     (Python通用项目)"
-        echo "    13) fastapi_vue3       (FastAPI + Vue3全栈)"
-        echo "    14) bash-scripts       (Bash脚本项目)"
-        echo "    15) java-maven         (Java Maven项目)"
-        echo "    16) java-gradle        (Java Gradle项目)"
-        echo "    17) rust-project       (Rust项目)"
-        echo "    18) php-project        (PHP项目)"
-        echo ""
-        read -r -p "请输入选项编号 (1-18): " choice
+echo "🛩️ Claude Autopilot 2.1 智能项目配置器"
+echo "================================================"
 
-        case "$choice" in
-            1) PROJECT_TYPE="gin-microservice" ;;
-            2) PROJECT_TYPE="gin-vue3" ;;
-            3) PROJECT_TYPE="go-desktop" ;;
-            4) PROJECT_TYPE="go-general" ;;
-            5) PROJECT_TYPE="vue3-frontend" ;;
-            6) PROJECT_TYPE="vue2-frontend" ;;
-            7) PROJECT_TYPE="react-frontend" ;;
-            8) PROJECT_TYPE="nextjs-frontend" ;;
-            9) PROJECT_TYPE="nodejs-general" ;;
-            10) PROJECT_TYPE="python-desktop" ;;
-            11) PROJECT_TYPE="django" ;;
-            12) PROJECT_TYPE="python-general" ;;
-            13) PROJECT_TYPE="fastapi_vue3" ;;
-            14) PROJECT_TYPE="bash-scripts" ;;
-            15) PROJECT_TYPE="java-maven" ;;
-            16) PROJECT_TYPE="java-gradle" ;;
-            17) PROJECT_TYPE="rust-project" ;;
-            18) PROJECT_TYPE="php-project" ;;
-            *)
-                echo "❌ 无效选择，退出"
-                exit 1
-                ;;
-        esac
-        echo "   ✅ 已选择项目类型: $PROJECT_TYPE"
-    fi
-fi
-TECH_STACK=$(detect_tech_stack "$PROJECT_PATH" "$PROJECT_TYPE")
-PROJECT_NAME=$(basename "$PROJECT_PATH")
-
-echo "   📦 项目名称: $PROJECT_NAME"
-echo "   🏷️ 项目类型: $PROJECT_TYPE"
-echo "   🔧 技术栈: $TECH_STACK"
-echo ""
-
-# 执行项目健康度评估
-if [ "$IS_NEW_PROJECT" = true ]; then
-    echo "🏗️ 新项目创建模式，跳过健康度评估..."
-    HEALTH_PERCENTAGE=0
-else
-    echo "🏥 执行项目健康度评估..."
-    # 将健康度评估的诊断输出重定向到当前标准输出，只获取数字结果
-    HEALTH_PERCENTAGE=$(assess_project_health "$PROJECT_PATH" "$PROJECT_TYPE" 2>&1 | tail -1)
-    echo ""
-    echo "📊 项目健康度: $HEALTH_PERCENTAGE%"
-fi
-
-# 根据健康度给出建议 (跳过新项目)
-if [ "$IS_NEW_PROJECT" = false ]; then
-    if [ "$HEALTH_PERCENTAGE" -lt 70 ]; then
-        echo "⚠️  项目健康度较低，建议在注入CE前先改善项目结构"
-        echo "   查看详细评估报告: project_process/health-assessment-*.md"
-        echo ""
-        read -r -p "是否继续注入CE系统？(y/N): " continue_injection
-        if [[ ! "$continue_injection" =~ ^[Yy]$ ]]; then
-            echo "❌ 注入已取消。请改善项目健康度后重试。"
-            exit 1
-        fi
-    elif [ "$HEALTH_PERCENTAGE" -lt 90 ]; then
-        echo "💡 项目健康度良好，但仍有改进空间"
-        echo "   查看详细评估报告: project_process/health-assessment-*.md"
-    fi
-    echo ""
-fi
-
-# 创建标准项目结构（基于健康度评估结果或新项目）
-if [ "$IS_NEW_PROJECT" = true ] || [ "$HEALTH_PERCENTAGE" -lt 80 ]; then
-    if [ "$IS_NEW_PROJECT" = true ]; then
-        echo "🏗️ 创建 $PROJECT_TYPE 标准项目结构..."
+# 跨平台realpath函数
+get_realpath() {
+    if command -v realpath >/dev/null 2>&1; then
+        realpath "$1"
     else
-        echo "🏗️ 项目结构不够完善，开始创建标准项目结构..."
+        # 兼容macOS等没有realpath的系统
+        cd "$(dirname "$1")" && echo "$(pwd)/$(basename "$1")"
     fi
-    create_standard_project_structure "$PROJECT_PATH" "$PROJECT_TYPE" "$PROJECT_NAME"
-    echo ""
-elif [ "$HEALTH_PERCENTAGE" -lt 95 ]; then
-    echo "🔧 完善项目结构..."
-    # 只创建缺失的关键部分，不覆盖现有结构
-    create_universal_structure "$PROJECT_PATH" "$PROJECT_NAME"
-    echo ""
+}
+
+# 动态检测脚本路径 - 自动获取claude-autopilot根目录
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# 脚本在 bin/ 目录下，所以上级目录就是 claude-autopilot 根目录
+CLAUDE_AUTOPILOT_ROOT="$(dirname "$SCRIPT_DIR")"
+GLOBAL_RULES_PATH="$CLAUDE_AUTOPILOT_ROOT"
+GLOBAL_CE_PATH="$CLAUDE_AUTOPILOT_ROOT/share/claude-autopilot"
+SCRIPT_VERSION="2.0.0"
+TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+
+# 导出全局路径变量供子脚本使用
+export GLOBAL_RULES_PATH
+export GLOBAL_CE_PATH
+
+# 调试信息
+echo "🔍 全局路径调试:"
+echo "   GLOBAL_RULES_PATH: $GLOBAL_RULES_PATH"
+echo "   GLOBAL_CE_PATH: $GLOBAL_CE_PATH"
+
+# 新的参数解析系统
+TARGET_DIR=""
+PROJECT_TYPE=""
+OWNER=""
+
+# 参数解析
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --target_dir)
+            if [ -z "$2" ] || [[ "$2" == --* ]]; then
+                echo "❌ 错误: --target_dir 需要提供目录路径"
+                exit 1
+            fi
+            TARGET_DIR="$2"
+            shift 2
+            ;;
+        --project_type)
+            if [ -z "$2" ] || [[ "$2" == --* ]]; then
+                echo "❌ 错误: --project_type 需要提供项目类型"
+                exit 1
+            fi
+            PROJECT_TYPE="$2"
+            shift 2
+            ;;
+        --owner)
+            if [ -z "$2" ] || [[ "$2" == --* ]]; then
+                echo "❌ 错误: --owner 需要提供所有者名称"
+                exit 1
+            fi
+            OWNER="$2"
+            shift 2
+            ;;
+        -h|--help)
+            show_usage
+            exit 0
+            ;;
+        -v|--version)
+            echo "Claude Autopilot v2.1.0"
+            exit 0
+            ;;
+        *)
+            echo "❌ 错误: 未知参数 $1"
+            echo ""
+            show_usage
+            exit 1
+            ;;
+    esac
+done
+
+# 处理target_dir参数
+if [ -z "$TARGET_DIR" ]; then
+    # 未提供target_dir，使用当前目录
+    TARGET_DIR=$(pwd)
+    echo "📂 使用当前目录: $TARGET_DIR"
+elif [[ "$TARGET_DIR" == /* ]]; then
+    # 绝对路径
+    echo "📂 使用绝对路径: $TARGET_DIR"
 else
-    echo "✅ 项目结构已经很完善，跳过结构创建"
-    echo ""
+    # 相对路径，在当前目录下创建
+    TARGET_DIR="$(pwd)/$TARGET_DIR"
+    echo "📂 相对路径转换为: $TARGET_DIR"
 fi
 
-# 初始化部署策略管理（仅在传统模式下）
-if [ -f "$PROJECT_PATH/deployments/docker-compose.smart.yml" ]; then
-    echo "🚀 检测到智能部署配置，跳过传统部署策略管理器..."
-else
-    echo "🚀 初始化智能部署策略..."
-    init_deployment_strategy_manager "$PROJECT_PATH" "$PROJECT_TYPE" "$PROJECT_NAME"
+# 规范化路径
+if [ -d "$TARGET_DIR" ]; then
+    TARGET_DIR=$(get_realpath "$TARGET_DIR")
 fi
+
+echo "📂 最终目标目录: $TARGET_DIR"
+echo "🔧 Claude Autopilot路径: $GLOBAL_CE_PATH"
 echo ""
 
-# 初始化国际化功能
-echo "🌍 初始化国际化功能..."
-init_internationalization_manager "$PROJECT_PATH" "$PROJECT_TYPE" "$PROJECT_NAME"
+# 检测项目状态
+echo "🔍 检测项目状态..."
+PROJECT_STATUS=$(detect_project_status "$TARGET_DIR")
+echo "   状态: $PROJECT_STATUS"
 echo ""
 
-# 创建.claude目录结构
-echo "📁 创建Claude Code配置目录..."
-mkdir -p "$PROJECT_PATH/.claude"
+# 函数定义：处理CREATE_NEW模式
+handle_create_new_mode() {
+    echo "🆕 新建项目模式"
+    echo "================================================"
+    
+    # 创建目录（如果不存在）
+    if [ ! -d "$TARGET_DIR" ]; then
+        echo "📁 创建目录: $TARGET_DIR"
+        mkdir -p "$TARGET_DIR" || {
+            echo "❌ 错误: 无法创建目录 $TARGET_DIR"
+            exit 1
+        }
+    fi
+    
+    # 处理项目类型
+    if [ -n "$PROJECT_TYPE" ]; then
+        if validate_project_type "$PROJECT_TYPE"; then
+            echo "✅ 使用指定的项目类型: $PROJECT_TYPE"
+            FINAL_PROJECT_TYPE="$PROJECT_TYPE"
+        else
+            echo "❌ 项目类型 '$PROJECT_TYPE' 无效"
+            show_valid_project_types
+            echo ""
+            echo "请从有效类型中选择:"
+            FINAL_PROJECT_TYPE=$(interactive_select_project_type)
+        fi
+    else
+        echo "📋 请选择项目类型:"
+        FINAL_PROJECT_TYPE=$(interactive_select_project_type)
+    fi
+    echo "   ✅ 最终项目类型: $FINAL_PROJECT_TYPE"
+    
+    # 处理Owner
+    if [ -n "$OWNER" ]; then
+        echo "👤 使用指定的owner: $OWNER"
+        FINAL_OWNER="$OWNER"
+    else
+        echo ""
+        read -r -p "👤 请输入项目所有者 (留空则自动生成UUID): " input_owner
+        if [ -n "$input_owner" ]; then
+            FINAL_OWNER="$input_owner"
+        else
+            FINAL_OWNER=""  # 将在后面生成UUID
+        fi
+    fi
+    
+    # 生成项目ID和设置owner
+    PROJECT_ID=$(generate_uuid7)
+    if [ -z "$FINAL_OWNER" ]; then
+        FINAL_OWNER="$PROJECT_ID"
+        echo "   ℹ️ owner未提供，使用project_id: $FINAL_OWNER"
+    else
+        echo "   ✅ 最终owner: $FINAL_OWNER"
+    fi
+    
+    echo "   🆔 项目ID: $PROJECT_ID"
+    echo ""
+    
+    # 继续原有的创建流程
+    continue_create_project_flow
+}
+
+# 函数定义：处理INJECT_EXISTING模式  
+handle_inject_existing_mode() {
+    echo "🔄 现有项目注入模式"
+    echo "================================================"
+    
+    # 读取现有项目配置
+    EXISTING_CONFIG="$TARGET_DIR/.claude/project.json"
+    EXISTING_CLAUDE_MD="$TARGET_DIR/CLAUDE.md"
+    
+    EXISTING_PROJECT_TYPE=""
+    EXISTING_OWNER=""
+    EXISTING_PROJECT_ID=""
+    
+    # 尝试从project.json读取现有配置
+    if [ -f "$EXISTING_CONFIG" ]; then
+        echo "📖 读取现有配置: .claude/project.json"
+        if command -v jq >/dev/null 2>&1; then
+            EXISTING_PROJECT_TYPE=$(jq -r '.project_type // empty' "$EXISTING_CONFIG" 2>/dev/null)
+            EXISTING_OWNER=$(jq -r '.owner // empty' "$EXISTING_CONFIG" 2>/dev/null)  
+            EXISTING_PROJECT_ID=$(jq -r '.project_id // empty' "$EXISTING_CONFIG" 2>/dev/null)
+        else
+            # 简单的grep方式解析JSON（不完美但可用）
+            EXISTING_PROJECT_TYPE=$(grep -o '"project_type"[[:space:]]*:[[:space:]]*"[^"]*"' "$EXISTING_CONFIG" 2>/dev/null | sed 's/.*"\\([^"]*\\)".*/\\1/')
+            EXISTING_OWNER=$(grep -o '"owner"[[:space:]]*:[[:space:]]*"[^"]*"' "$EXISTING_CONFIG" 2>/dev/null | sed 's/.*"\\([^"]*\\)".*/\\1/')
+            EXISTING_PROJECT_ID=$(grep -o '"project_id"[[:space:]]*:[[:space:]]*"[^"]*"' "$EXISTING_CONFIG" 2>/dev/null | sed 's/.*"\\([^"]*\\)".*/\\1/')
+        fi
+        
+        [ -n "$EXISTING_PROJECT_TYPE" ] && echo "   现有项目类型: $EXISTING_PROJECT_TYPE"
+        [ -n "$EXISTING_OWNER" ] && echo "   现有owner: $EXISTING_OWNER"  
+        [ -n "$EXISTING_PROJECT_ID" ] && echo "   现有项目ID: $EXISTING_PROJECT_ID"
+    fi
+    
+    # 处理项目类型
+    if [ -n "$EXISTING_PROJECT_TYPE" ] && [ -n "$PROJECT_TYPE" ]; then
+        echo ""
+        echo "⚠️  检测到现有项目类型: $EXISTING_PROJECT_TYPE"
+        echo "⚠️  参数指定项目类型: $PROJECT_TYPE"
+        read -r -p "是否覆盖现有项目类型为 '$PROJECT_TYPE'？(y/N): " confirm
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            FINAL_PROJECT_TYPE="$PROJECT_TYPE"
+            echo "   ✅ 项目类型已更新为: $FINAL_PROJECT_TYPE"
+        else
+            FINAL_PROJECT_TYPE="$EXISTING_PROJECT_TYPE"
+            echo "   ✅ 保持现有项目类型: $FINAL_PROJECT_TYPE"
+        fi
+    elif [ -n "$EXISTING_PROJECT_TYPE" ]; then
+        read -r -p "保持现有项目类型 '$EXISTING_PROJECT_TYPE'？(Y/n): " confirm
+        if [[ "$confirm" =~ ^[Nn]$ ]]; then
+            echo "📋 请选择新的项目类型:"
+            FINAL_PROJECT_TYPE=$(interactive_select_project_type)
+        else
+            FINAL_PROJECT_TYPE="$EXISTING_PROJECT_TYPE"
+        fi
+        echo "   ✅ 最终项目类型: $FINAL_PROJECT_TYPE"
+    elif [ -n "$PROJECT_TYPE" ]; then
+        if validate_project_type "$PROJECT_TYPE"; then
+            FINAL_PROJECT_TYPE="$PROJECT_TYPE"
+            echo "   ✅ 设置项目类型: $FINAL_PROJECT_TYPE"
+        else
+            echo "❌ 项目类型 '$PROJECT_TYPE' 无效"
+            echo "📋 请选择有效的项目类型:"
+            FINAL_PROJECT_TYPE=$(interactive_select_project_type)
+        fi
+    else
+        echo "📋 请选择项目类型:"
+        FINAL_PROJECT_TYPE=$(interactive_select_project_type)
+    fi
+    
+    # 处理Owner
+    if [ -n "$EXISTING_OWNER" ] && [ -n "$OWNER" ]; then
+        echo ""
+        echo "⚠️  检测到现有owner: $EXISTING_OWNER"
+        echo "⚠️  参数指定owner: $OWNER"
+        read -r -p "是否覆盖现有owner为 '$OWNER'？(y/N): " confirm
+        if [[ "$confirm" =~ ^[Yy]$ ]]; then
+            FINAL_OWNER="$OWNER"
+            echo "   ✅ Owner已更新为: $FINAL_OWNER"
+        else
+            FINAL_OWNER="$EXISTING_OWNER"
+            echo "   ✅ 保持现有owner: $FINAL_OWNER"
+        fi
+    elif [ -n "$EXISTING_OWNER" ]; then
+        read -r -p "保持现有owner '$EXISTING_OWNER'？(Y/n): " confirm
+        if [[ "$confirm" =~ ^[Nn]$ ]]; then
+            read -r -p "请输入新的owner: " new_owner
+            FINAL_OWNER="${new_owner:-$EXISTING_OWNER}"
+        else
+            FINAL_OWNER="$EXISTING_OWNER"
+        fi
+        echo "   ✅ 最终owner: $FINAL_OWNER"
+    elif [ -n "$OWNER" ]; then
+        FINAL_OWNER="$OWNER"
+        echo "   ✅ 设置owner: $FINAL_OWNER"
+    else
+        read -r -p "请输入owner (留空则自动生成): " input_owner
+        FINAL_OWNER="$input_owner"
+    fi
+    
+    # 处理项目ID（注入模式保持现有ID或生成新的）
+    if [ -n "$EXISTING_PROJECT_ID" ]; then
+        PROJECT_ID="$EXISTING_PROJECT_ID"
+        echo "   🆔 保持现有项目ID: $PROJECT_ID"
+    else
+        PROJECT_ID=$(generate_uuid7)
+        echo "   🆔 生成新项目ID: $PROJECT_ID"
+    fi
+    
+    # 如果owner为空，使用project_id
+    if [ -z "$FINAL_OWNER" ]; then
+        FINAL_OWNER="$PROJECT_ID"
+        echo "   ℹ️ owner未提供，使用project_id: $FINAL_OWNER"
+    fi
+    
+    echo ""
+    
+    # 继续注入流程
+    continue_inject_project_flow
+}
+
+# 函数定义：处理NON_EMPTY_NON_PROJECT模式
+handle_non_empty_non_project_mode() {
+    echo "⚠️  非空非项目目录"
+    echo "================================================"
+    
+    echo "目录 '$TARGET_DIR' 非空且不是Claude项目"
+    echo ""
+    echo "📁 目录内容概览:"
+    ls -la "$TARGET_DIR" | head -6
+    if [ "$(ls -1 "$TARGET_DIR" | wc -l)" -gt 5 ]; then
+        echo "... (更多文件)"
+    fi
+    echo ""
+    
+    read -r -p "⚠️  是否继续在此目录创建项目？这可能覆盖现有文件 (y/N): " confirm
+    if [[ "$confirm" =~ ^[Yy]$ ]]; then
+        echo "✅ 用户确认继续，转为新建项目模式"
+        PROJECT_STATUS="CREATE_NEW"
+        handle_create_new_mode
+    else
+        echo "❌ 操作已取消"
+        echo "💡 建议: 请选择其他目录或清空当前目录后重试"
+        exit 1
+    fi
+}
+
+# 继续新建项目流程
+continue_create_project_flow() {
+    echo "🚀 开始创建项目..."
+    
+    # 设置项目变量
+    PROJECT_NAME=$(basename "$TARGET_DIR")
+    TECH_STACK=$(detect_tech_stack "$TARGET_DIR" "$FINAL_PROJECT_TYPE")
+    
+    echo "📊 项目信息汇总:"
+    echo "   📂 项目名称: $PROJECT_NAME"
+    echo "   🏷️ 项目类型: $FINAL_PROJECT_TYPE"
+    echo "   🔧 技术栈: $TECH_STACK"
+    echo "   👤 项目所有者: $FINAL_OWNER"
+    echo "   🆔 项目ID: $PROJECT_ID"
+    echo ""
+    
+    # 执行项目健康度评估
+    echo "🏥 执行项目健康度评估..."
+    # 新项目健康度为0
+    HEALTH_PERCENTAGE=0
+    echo "📊 项目健康度: $HEALTH_PERCENTAGE%"
+    echo ""
+    
+    # 加载必要的库函数
+    load_required_libraries
+    
+    # 执行原有的项目创建流程
+    execute_project_creation
+}
+
+# 继续注入项目流程  
+continue_inject_project_flow() {
+    echo "🔄 开始注入配置..."
+    
+    # 设置项目变量
+    PROJECT_NAME=$(basename "$TARGET_DIR")
+    TECH_STACK=$(detect_tech_stack "$TARGET_DIR" "$FINAL_PROJECT_TYPE")
+    
+    echo "📊 项目信息汇总:"
+    echo "   📂 项目名称: $PROJECT_NAME"
+    echo "   🏷️ 项目类型: $FINAL_PROJECT_TYPE"
+    echo "   🔧 技术栈: $TECH_STACK"
+    echo "   👤 项目所有者: $FINAL_OWNER"
+    echo "   🆔 项目ID: $PROJECT_ID"
+    echo ""
+    
+    # 加载必要的库函数
+    load_required_libraries
+    
+    # 执行项目健康度评估（现有项目）
+    echo "🏥 执行项目健康度评估..."
+    HEALTH_PERCENTAGE=$(assess_project_health "$TARGET_DIR" "$FINAL_PROJECT_TYPE" 2>&1 | tail -1)
+    echo "📊 项目健康度: $HEALTH_PERCENTAGE%"
+    echo ""
+    
+    # 执行注入更新流程
+    execute_project_injection
+}
+
+# 执行项目创建流程
+execute_project_creation() {
+    # 创建标准项目结构
+    echo "🏗️ 创建 $FINAL_PROJECT_TYPE 标准项目结构..."
+    create_standard_project_structure "$TARGET_DIR" "$FINAL_PROJECT_TYPE" "$PROJECT_NAME"
+    echo ""
+    
+    # 初始化部署策略管理
+    if [ -f "$TARGET_DIR/deployments/docker-compose.smart.yml" ]; then
+        echo "🚀 检测到智能部署配置，跳过传统部署策略管理器..."
+    else
+        echo "🚀 初始化智能部署策略..."
+        init_deployment_strategy_manager "$TARGET_DIR" "$FINAL_PROJECT_TYPE" "$PROJECT_NAME"
+    fi
+    echo ""
+    
+    # 初始化国际化功能
+    echo "🌍 初始化国际化功能..."
+    init_internationalization_manager "$TARGET_DIR" "$FINAL_PROJECT_TYPE" "$PROJECT_NAME"
+    echo ""
+    
+    # 创建.Claude目录结构
+    echo "📁 创建Claude Code配置目录..."
+    mkdir -p "$TARGET_DIR/.claude"
+    
+    # 生成项目配置文件
+    generate_project_config
+    
+    # 生成轻量级CLAUDE.md
+    generate_claude_md
+    
+    # 创建项目过程跟踪目录
+    create_project_process_dirs
+    
+    # 创建全局基础结构
+    create_global_base_structure
+    
+    # 验证配置
+    verify_configuration
+    
+    # 显示完成信息
+    show_completion_summary
+}
+
+# 执行项目注入流程
+execute_project_injection() {
+    # 注入模式：只更新配置，不破坏现有结构
+    echo "🔄 更新项目配置（注入模式）..."
+    
+    # 备份现有配置
+    if [ -f "$TARGET_DIR/.claude/project.json" ]; then
+        cp "$TARGET_DIR/.claude/project.json" "$TARGET_DIR/.claude/project.json.backup.$(date +%Y%m%d_%H%M%S)"
+        echo "   📋 已备份现有配置"
+    fi
+    
+    # 创建.claude目录（如果不存在）
+    mkdir -p "$TARGET_DIR/.claude"
+    
+    # 生成更新的项目配置文件
+    generate_project_config
+    
+    # 更新CLAUDE.md（如果需要）
+    if [ ! -f "$TARGET_DIR/CLAUDE.md" ] || [ "$TARGET_DIR/CLAUDE.md" -ot "$TARGET_DIR/.claude/project.json" ]; then
+        echo "📄 更新CLAUDE.md..."
+        generate_claude_md
+    else
+        echo "📄 CLAUDE.md已存在且较新，跳过更新"
+    fi
+    
+    # 创建缺失的基础目录
+    echo "📁 检查并创建缺失的基础目录..."
+    mkdir -p "$TARGET_DIR/project_process"/{daily,reports,prps,bugfixes,analysis}
+    mkdir -p "$TARGET_DIR/project_docs"
+    
+    # 检查命令配置
+    check_command_configuration
+    
+    # 验证配置
+    verify_configuration
+    
+    # 显示注入完成信息
+    show_injection_summary
+}
 
 # 生成项目配置文件
-echo "⚙️ 生成项目配置文件..."
-cat > "$PROJECT_PATH/.claude/project.json" << EOF
+generate_project_config() {
+    echo "⚙️ 生成项目配置文件..."
+    cat > "$TARGET_DIR/.claude/project.json" << EOF
 {
+  "project_id": "$PROJECT_ID",
   "project_name": "$PROJECT_NAME",
-  "project_type": "$PROJECT_TYPE",
+  "project_type": "$FINAL_PROJECT_TYPE",
   "tech_stack": "$TECH_STACK",
+  "owner": "$FINAL_OWNER",
   "global_ce_path": "$GLOBAL_CE_PATH",
   "auto_load_context": true,
   "enabled_workflows": [
@@ -406,58 +769,43 @@ cat > "$PROJECT_PATH/.claude/project.json" << EOF
     "typecheck_command": "make typecheck",
     "security_command": "make security-scan"
   },
-  "memory_context": "${PROJECT_TYPE}_${PROJECT_NAME}",
+  "memory_context": "${FINAL_PROJECT_TYPE}_${PROJECT_NAME}",
   "ce_version": "$SCRIPT_VERSION",
   "created_at": "$TIMESTAMP",
   "last_sync": "$TIMESTAMP"
 }
 EOF
-
-echo "   ✅ 项目配置文件: .claude/project.json"
-
-# 检查命令文件状态
-echo "🔗 检查命令配置..."
-md_files_count=$(find "$PROJECT_PATH/.claude/commands" -name "*.md" 2>/dev/null | wc -l)
-if [ "$md_files_count" -gt 0 ]; then
-    echo "   ✅ Claude命令文件已复制到项目 (${md_files_count}个)"
-elif [ ! -L "$PROJECT_PATH/.claude/commands" ]; then
-    echo "   🔗 创建全局命令链接（回退方案）..."
-    ln -sf "$GLOBAL_RULES_PATH/share/claude-autopilot/commands" "$PROJECT_PATH/.claude/commands"
-    echo "   ✅ 全局命令链接: .claude/commands -> $GLOBAL_RULES_PATH/share/claude-autopilot/commands"
-else
-    echo "   ℹ️ 命令链接已存在"
-fi
+    echo "   ✅ 项目配置文件: .claude/project.json"
+}
 
 # 生成轻量级CLAUDE.md
-echo "📄 生成轻量级CLAUDE.md..."
+generate_claude_md() {
+    echo "📄 生成轻量级CLAUDE.md..."
+    
+    # 检查项目类型模板是否存在
+    PROJECT_TYPE_TEMPLATE="$GLOBAL_RULES_PATH/share/claude-autopilot/project-types/${FINAL_PROJECT_TYPE}.md"
+    if [ -f "$PROJECT_TYPE_TEMPLATE" ]; then
+        # 使用项目类型专用模板，并替换变量
+        sed -e "s/\$PROJECT_NAME/$PROJECT_NAME/g" \
+            -e "s/\$TECH_STACK/$TECH_STACK/g" \
+            -e "s/\$SCRIPT_VERSION/$SCRIPT_VERSION/g" \
+            -e "s/\$TIMESTAMP/$TIMESTAMP/g" \
+            -e "s|\$GLOBAL_CE_PATH|$GLOBAL_CE_PATH|g" \
+            "$PROJECT_TYPE_TEMPLATE" > "$TARGET_DIR/CLAUDE.md"
+        echo "   ✅ 使用项目类型模板: ${FINAL_PROJECT_TYPE}.md"
+    else
+        # 生成通用模板
+        echo "   ⚠️ 项目类型 '$FINAL_PROJECT_TYPE' 未在 project_types/ 中定义"
+        echo "   📝 生成通用模板"
+        generate_generic_claude_md
+    fi
+    echo "   ✅ 轻量级CLAUDE.md文件已生成"
+}
 
-# 检查项目类型模板是否存在
-PROJECT_TYPE_TEMPLATE="$GLOBAL_RULES_PATH/share/claude-autopilot/project-types/${PROJECT_TYPE}.md"
-if [ -f "$PROJECT_TYPE_TEMPLATE" ]; then
-    # 使用项目类型专用模板，并替换变量
-    sed -e "s/\$PROJECT_NAME/$PROJECT_NAME/g" \
-        -e "s/\$TECH_STACK/$TECH_STACK/g" \
-        -e "s/\$SCRIPT_VERSION/$SCRIPT_VERSION/g" \
-        -e "s/\$TIMESTAMP/$TIMESTAMP/g" \
-        -e "s|\$GLOBAL_CE_PATH|$GLOBAL_CE_PATH|g" \
-        "$PROJECT_TYPE_TEMPLATE" > "$PROJECT_PATH/CLAUDE.md"
-    echo "   ✅ 使用项目类型模板: ${PROJECT_TYPE}.md"
-else
-    # 项目类型未定义，生成带提醒的通用模板
-    echo "   ⚠️ 项目类型 '$PROJECT_TYPE' 未在 project_types/ 中定义"
-    echo "   📝 生成注释模板，请手动完善项目类型定义"
-
-cat > "$PROJECT_PATH/CLAUDE.md" << EOF
+# 生成通用CLAUDE.md模板
+generate_generic_claude_md() {
+    cat > "$TARGET_DIR/CLAUDE.md" << EOF
 # CLAUDE.md - 智能AI协作指南
-
-## ⚠️ **项目类型未定义提醒**
-
-**重要**: 项目类型 \`$PROJECT_TYPE\` 尚未在 \`project_types/\` 目录中定义专用模板。
-
-**下一步操作**:
-1. 创建文件: \`$GLOBAL_CE_PATH/project-types/${PROJECT_TYPE}.md\`
-2. 参考现有模板（如 \`gin_microservice.md\`）编写项目类型规范
-3. 重新运行注入脚本以应用专用模板
 
 ## 🚀 **智能Claude Autopilot 2.1 已激活**
 
@@ -465,15 +813,12 @@ cat > "$PROJECT_PATH/CLAUDE.md" << EOF
 
 ### **📊 项目信息**
 - **项目名称**: $PROJECT_NAME
-- **项目类型**: $PROJECT_TYPE ⚠️ (未定义)
+- **项目类型**: $FINAL_PROJECT_TYPE
 - **技术栈**: $TECH_STACK
+- **项目所有者**: $FINAL_OWNER
+- **项目ID**: $PROJECT_ID
 - **CE版本**: $SCRIPT_VERSION
 - **配置时间**: $TIMESTAMP
-
-<!--
-注意: 以下是通用模板，当项目类型模板定义后将被替换
-如需自定义，请创建项目类型模板文件
--->
 
 ### **🎯 智能命令**
 
@@ -528,81 +873,6 @@ cat > "$PROJECT_PATH/CLAUDE.md" << EOF
 - **禁止规则**: 自动检测和阻止违规操作
 - **质量门**: 多层次自动验证确保代码质量
 
-#### **智能化特性**
-- **需求智能分析**: 复杂度评估+风险预测+工作量估算
-- **方案智能生成**: 基于历史经验+最新技术的最优方案
-- **代码智能实现**: 模式复用+自动纠错+质量验证
-- **经验智能积累**: 开发过程自动保存，团队知识共享
-
-### **📋 使用建议**
-
-#### **开始开发**
-1. 直接描述你的需求，如："添加用户登录功能"
-2. 系统会自动执行完整的智能开发流程
-3. 享受一次性实现成功的开发体验
-
-#### **遇到问题**
-1. 描述具体问题，如："登录接口偶尔返回500错误"
-2. 系统会智能诊断根因并自动修复
-3. 修复经验会自动保存供后续复用
-
-#### **代码优化**
-1. 说明优化目标，如："优化用户服务性能"
-2. 系统会基于最佳实践进行智能重构
-3. 确保重构后质量和功能完整性
-
-### **🔗 技术架构**
-
-#### **集中式管理**
-- **全局规则**: $GLOBAL_CE_PATH
-- **智能工作流**: 零重复，一处更新全局生效
-- **模式库**: 分类管理，智能匹配适用模式
-- **经验库**: 跨项目共享，持续积累改进
-
-#### **轻量化部署**
-- **本项目配置**: .claude/project.json (项目特定配置)
-- **命令链接**: .claude/commands (指向全局命令)
-- **无文件重复**: 所有CE资源集中管理
-- **自动同步**: 全局更新自动应用到项目
-
-### **📈 效率提升**
-
-相比传统开发方式，Claude Autopilot 2.0提供：
-- ⚡ **开发效率**: 提升3-5倍
-- 🎯 **一次成功率**: 95%+
-- 📊 **代码质量**: A级标准
-- 🧠 **知识复用**: 团队经验自动积累
-- 🔒 **质量保证**: 多层次自动验证
-
-### **🆘 故障排除**
-
-#### **命令不可用**
-\`\`\`bash
-# 重新加载全局上下文 / Reload Global Context
-/加载全局上下文 --force-refresh
-# OR /load-global-context --force-refresh
-\`\`\`
-
-#### **规则不生效**
-检查Claude Autopilot路径是否正确：$GLOBAL_CE_PATH
-
-#### **获取帮助**
-查看Claude Autopilot文档：$GLOBAL_CE_PATH/README.md
-
----
-
-## 🚀 **开始智能开发之旅**
-
-智能Claude Autopilot 2.1已为您准备就绪！
-
-**直接描述您的需求**，系统会自动选择最适合的智能工作流程：
-
-- 功能开发 → 自动执行智能功能开发流程
-- 问题修复 → 自动执行智能Bug修复流程
-- 代码优化 → 自动执行智能重构流程
-
-**享受一次性成功的智能开发体验！** ✨
-
 ---
 
 **Claude Autopilot路径**: $GLOBAL_CE_PATH
@@ -610,17 +880,16 @@ cat > "$PROJECT_PATH/CLAUDE.md" << EOF
 **最后同步**: $TIMESTAMP
 **CE版本**: v$SCRIPT_VERSION
 
-*本文件由Claude Autopilot注入脚本自动生成，请勿手动修改核心配置部分*
+*本文件由Claude Autopilot注入脚本自动生成*
 EOF
-fi
+}
 
-echo "   ✅ 轻量级CLAUDE.md文件已生成"
-
-# 创建project_process目录结构
-echo "📁 创建项目过程跟踪目录..."
-mkdir -p "$PROJECT_PATH/project_process"/{daily,reports,prps,bugfixes,analysis}
-
-cat > "$PROJECT_PATH/project_process/README.md" << EOF
+# 创建项目过程跟踪目录
+create_project_process_dirs() {
+    echo "📁 创建项目过程跟踪目录..."
+    mkdir -p "$TARGET_DIR/project_process"/{daily,reports,prps,bugfixes,analysis}
+    
+    cat > "$TARGET_DIR/project_process/README.md" << EOF
 # 项目过程记录
 
 这个目录用于智能Claude Autopilot 2.1系统自动记录开发过程。
@@ -635,24 +904,26 @@ cat > "$PROJECT_PATH/project_process/README.md" << EOF
 ## 自动生成
 所有文件由Claude Autopilot系统自动生成，记录开发过程和经验。
 EOF
+    
+    echo "   ✅ 项目过程目录结构已创建"
+}
 
-echo "   ✅ 项目过程目录结构已创建"
-
-# 创建其他全局基础结构
-echo "📁 创建全局基础结构..."
-
-# 创建project_docs目录
-if [ ! -d "$PROJECT_PATH/project_docs" ]; then
-    mkdir -p "$PROJECT_PATH/project_docs"
-    echo "   ✅ 创建目录: project_docs/"
-fi
-
-# 创建.vscode目录和配置
-if [ ! -d "$PROJECT_PATH/.vscode" ]; then
-    mkdir -p "$PROJECT_PATH/.vscode"
-
-    # VSCode settings.json
-    cat > "$PROJECT_PATH/.vscode/settings.json" << 'EOF'
+# 创建全局基础结构
+create_global_base_structure() {
+    echo "📁 创建全局基础结构..."
+    
+    # 创建project_docs目录
+    if [ ! -d "$TARGET_DIR/project_docs" ]; then
+        mkdir -p "$TARGET_DIR/project_docs"
+        echo "   ✅ 创建目录: project_docs/"
+    fi
+    
+    # 创建.vscode目录和配置
+    if [ ! -d "$TARGET_DIR/.vscode" ]; then
+        mkdir -p "$TARGET_DIR/.vscode"
+        
+        # VSCode settings.json
+        cat > "$TARGET_DIR/.vscode/settings.json" << 'EOF'
 {
     "editor.tabSize": 2,
     "editor.insertSpaces": true,
@@ -666,13 +937,13 @@ if [ ! -d "$PROJECT_PATH/.vscode" ]; then
     }
 }
 EOF
-
-    echo "   ✅ 创建文件: .vscode/settings.json"
-fi
-
-# 创建.editorconfig
-if [ ! -f "$PROJECT_PATH/.editorconfig" ]; then
-    cat > "$PROJECT_PATH/.editorconfig" << 'EOF'
+        
+        echo "   ✅ 创建文件: .vscode/settings.json"
+    fi
+    
+    # 创建.editorconfig
+    if [ ! -f "$TARGET_DIR/.editorconfig" ]; then
+        cat > "$TARGET_DIR/.editorconfig" << 'EOF'
 root = true
 
 [*]
@@ -692,131 +963,136 @@ indent_size = 4
 [Makefile]
 indent_style = tab
 EOF
+        
+        echo "   ✅ 创建文件: .editorconfig"
+    fi
+    
+    echo "   ✅ 全局基础结构创建完成"
+}
 
-    echo "   ✅ 创建文件: .editorconfig"
-fi
-
-# 创建基础Makefile（如果不存在）
-if [ ! -f "$PROJECT_PATH/Makefile" ]; then
-    cat > "$PROJECT_PATH/Makefile" << 'EOF'
-.PHONY: help init dev build test lint clean deploy
-
-help:
-	@echo "可用命令:"
-	@echo "  init    - 初始化开发环境"
-	@echo "  dev     - 启动开发环境"
-	@echo "  build   - 构建项目"
-	@echo "  test    - 运行测试"
-	@echo "  lint    - 代码检查"
-	@echo "  clean   - 清理临时文件"
-	@echo "  deploy  - 部署项目"
-
-init:
-	@echo "🔧 初始化开发环境..."
-	@echo "请根据项目类型安装相应依赖"
-
-dev:
-	@echo "🚀 启动开发环境..."
-	@echo "请根据项目类型配置开发服务器"
-
-build:
-	@echo "📦 构建项目..."
-	@echo "请根据项目类型配置构建命令"
-
-test:
-	@echo "🧪 运行测试..."
-	@echo "请根据项目类型配置测试命令"
-
-lint:
-	@echo "🔍 代码检查..."
-	@echo "请根据项目类型配置代码检查命令"
-
-clean:
-	@echo "🧹 清理临时文件..."
-	@echo "请根据项目类型配置清理命令"
-
-deploy:
-	@echo "🚀 部署项目..."
-	@echo "请根据项目类型配置部署命令"
-EOF
-
-    echo "   ✅ 创建文件: Makefile"
-fi
-
-echo "   ✅ 全局基础结构创建完成"
-
-# 检查现有CLAUDE.md是否需要备份
-if [ -f "$PROJECT_PATH/CLAUDE.md.backup" ]; then
-    echo "ℹ️ 发现现有CLAUDE.md备份文件"
-fi
+# 检查命令配置
+check_command_configuration() {
+    echo "🔗 检查命令配置..."
+    md_files_count=$(find "$TARGET_DIR/.claude/commands" -name "*.md" 2>/dev/null | wc -l)
+    if [ "$md_files_count" -gt 0 ]; then
+        echo "   ✅ Claude命令文件已复制到项目 (${md_files_count}个)"
+    elif [ ! -L "$TARGET_DIR/.claude/commands" ]; then
+        echo "   🔗 创建全局命令链接（回退方案）..."
+        ln -sf "$GLOBAL_RULES_PATH/share/claude-autopilot/commands" "$TARGET_DIR/.claude/commands"
+        echo "   ✅ 全局命令链接: .claude/commands -> $GLOBAL_RULES_PATH/share/claude-autopilot/commands"
+    else
+        echo "   ℹ️ 命令链接已存在"
+    fi
+}
 
 # 验证配置
-echo "✅ 验证Claude Autopilot配置..."
+verify_configuration() {
+    echo "✅ 验证Claude Autopilot配置..."
+    
+    # 检查Claude Autopilot系统
+    echo "🔍 验证Claude Autopilot系统..."
+    WORKFLOWS_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/workflows" -name "*.md" 2>/dev/null | wc -l)
+    COMMANDS_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/commands" -name "*.md" 2>/dev/null | wc -l)
+    TEMPLATES_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/templates" -name "*.md" 2>/dev/null | wc -l)
+    
+    echo "   📋 智能工作流程: $WORKFLOWS_COUNT 个"  
+    echo "   🛠️ 智能命令: $COMMANDS_COUNT 个"
+    echo "   📄 智能模板: $TEMPLATES_COUNT 个"
+    
+    # 检查项目配置完整性
+    echo "🔍 验证项目配置完整性..."
+    if [ -f "$TARGET_DIR/.claude/project.json" ]; then
+        echo "   ✅ 项目配置文件存在"
+    else
+        echo "   ❌ 项目配置文件缺失"
+        exit 1
+    fi
+    
+    if [ -f "$TARGET_DIR/CLAUDE.md" ]; then
+        echo "   ✅ CLAUDE.md文件已生成"
+    else
+        echo "   ❌ CLAUDE.md文件生成失败"
+        exit 1
+    fi
+}
 
-# 检查Claude Autopilot系统
-echo "🔍 验证Claude Autopilot系统..."
-WORKFLOWS_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/workflows" -name "*.md" 2>/dev/null | wc -l)
-COMMANDS_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/commands" -name "*.md" 2>/dev/null | wc -l)
-TEMPLATES_COUNT=$(find "$GLOBAL_RULES_PATH/share/claude-autopilot/templates" -name "*.md" 2>/dev/null | wc -l)
+# 显示完成摘要
+show_completion_summary() {
+    echo ""
+    echo "🎊 Claude Autopilot 2.1 配置完成！"
+    echo "================================================"
+    echo ""
+    show_project_summary
+    show_usage_instructions
+}
 
-echo "   📋 智能工作流程: $WORKFLOWS_COUNT 个"
-echo "   🛠️ 智能命令: $COMMANDS_COUNT 个"
-echo "   📄 智能模板: $TEMPLATES_COUNT 个"
+# 显示注入摘要
+show_injection_summary() {
+    echo ""
+    echo "🎊 Claude Autopilot 2.1 注入完成！"
+    echo "================================================"
+    echo ""
+    show_project_summary
+    show_usage_instructions
+}
 
-# 检查项目配置完整性
-echo "🔍 验证项目配置完整性..."
-if [ -f "$PROJECT_PATH/.claude/project.json" ]; then
-    echo "   ✅ 项目配置文件存在"
-else
-    echo "   ❌ 项目配置文件缺失"
-    exit 1
-fi
+# 显示项目摘要
+show_project_summary() {
+    echo "📊 **项目摘要**:"
+    echo "   📂 项目: $PROJECT_NAME ($FINAL_PROJECT_TYPE)"
+    echo "   👤 所有者: $FINAL_OWNER"
+    echo "   🆔 项目ID: $PROJECT_ID"
+    echo "   🔧 技术栈: $TECH_STACK"
+    echo "   🏥 健康度: $HEALTH_PERCENTAGE%"
+    echo "   ⚙️ 配置文件: .claude/project.json"
+    echo "   📄 指南文件: CLAUDE.md"
+    echo "   📁 过程目录: project_process/"
+    echo ""
+}
 
-if [ -L "$PROJECT_PATH/.claude/commands" ]; then
-    echo "   ✅ 全局命令链接正常"
-else
-    echo "   ⚠️ 全局命令链接可能有问题"
-fi
+# 显示使用说明
+show_usage_instructions() {
+    echo "🚀 **可用的智能命令 / Available Smart Commands**:"
+    echo "   • /智能功能开发 <功能描述>        OR  /smart-feature-dev <feature description>"
+    echo "   • /智能Bug修复 <问题描述>         OR  /smart-bugfix <problem description>"
+    echo "   • /智能代码重构 <重构目标>       OR  /smart-code-refactor <refactor target>"
+    echo "   • /加载全局上下文               OR  /load-global-context"
+    echo "   • /项目状态分析                OR  /project-status-analysis"
+    echo "   • /清理残余文件                OR  /cleanup-project"
+    echo "   • /提交github                  OR  /commit-github"
+    echo ""
+    echo "💡 **开始使用**:"
+    echo "   1. 进入项目目录: cd $TARGET_DIR"
+    echo "   2. 启动Claude Code: claude code"
+    echo "   3. 直接描述需求开始智能开发！"
+    echo ""
+    echo "📚 **获取帮助**:"
+    echo "   - 全局文档: $GLOBAL_CE_PATH/README.md"
+    echo "   - 项目指南: CLAUDE.md"
+    echo ""
+    echo "✨ **享受智能开发体验！**"
+}
 
-if [ -f "$PROJECT_PATH/CLAUDE.md" ]; then
-    echo "   ✅ CLAUDE.md文件已生成"
-else
-    echo "   ❌ CLAUDE.md文件生成失败"
-    exit 1
-fi
+# 执行主要的状态处理逻辑
+case "$PROJECT_STATUS" in
+    "CREATE_NEW")
+        handle_create_new_mode
+        ;;
+    "INJECT_EXISTING") 
+        handle_inject_existing_mode
+        ;;
+    "NON_EMPTY_NON_PROJECT")
+        handle_non_empty_non_project_mode
+        ;;
+    *)
+        echo "❌ 未知的项目状态: $PROJECT_STATUS"
+        exit 1
+        ;;
+esac
 
+# 脚本执行完成
 echo ""
-echo "🎊 Claude Autopilot 2.1 配置完成！"
-echo "================================================"
-echo ""
-echo "📊 **注入摘要**:"
-echo "   📂 项目: $PROJECT_NAME ($PROJECT_TYPE)"
-echo "   🔧 技术栈: $TECH_STACK"
-echo "   🏥 健康度: $HEALTH_PERCENTAGE%"
-echo "   ⚙️ 配置文件: .claude/project.json"
-echo "   📄 指南文件: CLAUDE.md"
-echo "   🔗 命令链接: .claude/commands"
-echo "   📁 过程目录: project_process/"
-echo ""
-echo "🚀 **可用的智能命令 / Available Smart Commands**:"
-echo "   • /智能功能开发 <功能描述>        OR  /smart-feature-dev <feature description>"
-echo "   • /智能Bug修复 <问题描述>         OR  /smart-bugfix <problem description>"
-echo "   • /智能代码重构 <重构目标>       OR  /smart-code-refactor <refactor target>"
-echo "   • /加载全局上下文               OR  /load-global-context"
-echo "   • /项目状态分析                OR  /project-status-analysis"
-echo "   • /清理残余文件                OR  /cleanup-project"
-echo "   • /提交github                  OR  /commit-github"
-echo ""
-echo "💡 **开始使用**:"
-echo "   1. 进入项目目录: cd $PROJECT_PATH"
-echo "   2. 启动Claude Code: claude code"
-echo "   3. 直接描述需求开始智能开发！"
-echo ""
-echo "📚 **获取帮助**:"
-echo "   - 全局文档: $GLOBAL_CE_PATH/README.md"
-echo "   - 项目指南: CLAUDE.md"
-echo ""
-echo "✨ **享受智能开发体验！**"
+echo "🎉 脚本执行完成！"
 
 # 确保当前脚本有执行权限
 chmod +x "$0"

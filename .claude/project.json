@@ -1,8 +1,10 @@
 {
-  "project_name": "global_rules",
+  "project_id": "01943c97-8e40-7000-8c3a-d5f2b8e7a935",
+  "project_owner": "SamSmith",
+  "project_name": "claude-autopilot",
   "project_type": "bash-scripts",
   "tech_stack": "bash-scripts + Make + Tests",
-  "global_ce_path": "/Users/samsmith/GolandProjects/global_rules",
+  "global_ce_path": "/home/youmisam/claude-autopilot/share/claude-autopilot",
   "auto_load_context": true,
   "enabled_workflows": [
     "smart-feature-dev",
@@ -12,7 +14,7 @@
   "enabled_commands": [
     "load-global-context",
     "smart-feature-dev",
-    "smart-bugfix", 
+    "smart-bugfix",
     "smart-code-refactor",
     "project-status-analysis",
     "cleanup-project",
@@ -24,8 +26,8 @@
     "typecheck_command": "make typecheck",
     "security_command": "make security-scan"
   },
-  "memory_context": "bash-scripts_global_rules",
+  "memory_context": "bash-scripts_claude-autopilot",
   "ce_version": "2.0.0",
-  "created_at": "2025-07-26 13:13:10",
-  "last_sync": "2025-07-26 13:13:10"
+  "created_at": "2025-07-28 16:31:30",
+  "last_sync": "2025-07-28 16:31:30"
 }

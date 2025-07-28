@@ -5,11 +5,11 @@
 本项目已集成智能Claude Autopilot 2.1系统，专为Bash脚本项目优化的完整智能开发工作流程。
 
 ### **📊 项目信息**
-- **项目名称**: global_rules
+- **项目名称**: claude-autopilot
 - **项目类型**: Bash脚本项目
 - **技术栈**: bash-scripts + Make + Tests  
 - **CE版本**: 2.0.0
-- **配置时间**: 2025-07-26 13:13:10
+- **配置时间**: 2025-07-28 16:31:30
 
 ### **🎯 智能命令**
 
@@ -318,19 +318,19 @@ strace -c ./bin/main-script         # 系统调用统计
 
 ```bash
 # 1. 创建项目基础结构
-mkdir -p bin lib etc share/global_rules tests
+mkdir -p bin lib etc share/claude-autopilot tests
 touch Makefile README.md VERSION .shellcheckrc
 
 # 2. 设置开发环境
 make dev-setup
 
 # 3. 创建主脚本
-cat > bin/global_rules << 'EOF'
+cat > bin/claude-autopilot << 'EOF'
 #!/bin/bash
 set -euo pipefail
 # 主脚本内容
 EOF
-chmod +x bin/global_rules
+chmod +x bin/claude-autopilot
 
 # 4. 创建跨平台工具库
 cp lib/cross-platform-utils.sh lib/core-functions.sh
@@ -344,12 +344,12 @@ make test
 
 ---
 
-**Claude Autopilot路径**: /Users/samsmith/GolandProjects/global_rules  
+**Claude Autopilot路径**: /home/youmisam/claude-autopilot/share/claude-autopilot  
 **项目配置**: .claude/project.json  
 **标准化架构**: GNU编码标准 + FHS规范  
 **测试框架**: 内置Bash测试框架  
 **跨平台支持**: Linux/macOS/Windows WSL  
-**最后同步**: 2025-07-26 13:13:10  
+**最后同步**: 2025-07-28 16:31:30  
 **CE版本**: v2.0.0
 
 *本模板基于Claude Autopilot 2.1标准化重构，遵循GNU编码标准和Unix哲学*

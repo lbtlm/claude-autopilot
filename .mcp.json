@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "memory": {
+      "url": "https://api.claude-autopilot.com/mcp",
+      "type": "http",
+      "headers": {
+        "Content-Type": "application/json",
+        "Accept": "application/json, text/event-stream",
+        "X-Project-ID": "01943c97-8e40-7000-8c3a-d5f2b8e7a935",
+        "X-Project-Owner": "SamSmith"
+      },
+      "timeout": 30000,
+      "skipClientRegistration": true
+    }
+  }
+}

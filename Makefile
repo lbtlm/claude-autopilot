@@ -12,9 +12,9 @@ LIB_DIR := $(INSTALL_PREFIX)/lib/claude-ce
 
 # 脚本文件
 MAIN_SCRIPT := bin/claude-autopilot
-SETUP_SCRIPT := scripts/setup.sh
-QUICK_SETUP_SCRIPT := scripts/quick-setup.sh
-SCRIPTS := $(wildcard scripts/*/*.sh)
+SETUP_SCRIPT := bin/setup.sh
+QUICK_SETUP_SCRIPT := bin/quick-setup.sh
+SCRIPTS := $(wildcard bin/*.sh lib/*.sh)
 UTILS := $(wildcard lib/*.sh)
 CONFIGS := $(wildcard share/claude-autopilot/**/*.md)
 
@@ -27,9 +27,14 @@ all: lint test
 lint:
 	@echo "🔍 运行ShellCheck代码检查..."
 	@if command -v shellcheck >/dev/null 2>&1; then \
-		shellcheck bin/claude-autopilot && \
-		shellcheck lib/*.sh && \
-		shellcheck scripts/*.sh scripts/*/*.sh test*.sh 2>/dev/null || true; \
+		echo "使用ShellCheck进行静态分析..."; \
+		shellcheck bin/claude-autopilot || echo "⚠️ claude-autopilot 有警告"; \
+		for file in lib/*.sh; do \
+			shellcheck "$$file" || echo "⚠️ $$file 有警告"; \
+		done; \
+		for file in bin/*.sh; do \
+			shellcheck "$$file" || echo "⚠️ $$file 有警告"; \
+		done; \
 		echo "✅ ShellCheck检查完成"; \
 	else \
 		echo "⚠️  ShellCheck未安装，跳过静态分析"; \
@@ -37,7 +42,12 @@ lint:
 		echo "           brew install shellcheck      # macOS"; \
 		echo "💡 进行基本语法检查..."; \
 		bash -n bin/claude-autopilot && echo "✅ claude-autopilot语法检查通过"; \
-		for file in lib/*.sh scripts/*.sh; do bash -n "$$file" && echo "✅ $$file语法检查通过"; done; \
+		for file in lib/*.sh; do \
+			bash -n "$$file" && echo "✅ $$file语法检查通过"; \
+		done; \
+		for file in bin/*.sh; do \
+			bash -n "$$file" && echo "✅ $$file语法检查通过"; \
+		done; \
 	fi
 
 # 运行测试
@@ -55,23 +65,24 @@ test:
 # 安装到系统
 .PHONY: install
 install: lint
-	@echo "📦 安装Context Engineering 2.0系统..."
+	@echo "📦 安装Claude Autopilot 2.1系统..."
 	@mkdir -p $(BIN_DIR) $(CONFIG_DIR) $(LIB_DIR)
 	@cp -r bin/* $(BIN_DIR)/
-	@cp -r scripts/* $(BIN_DIR)/
 	@cp -r share/claude-autopilot $(CONFIG_DIR)/
 	@chmod +x $(BIN_DIR)/*
 	@echo "✅ 安装完成"
 	@echo "   可执行文件: $(BIN_DIR)/"
 	@echo "   配置文件: $(CONFIG_DIR)"
-	@echo "   使用方法: ce-inject [项目路径] [项目类型]"
+	@echo "   使用方法: claude-autopilot [项目路径] [项目类型]"
 	@echo "   或者: setup.sh (交互式配置)"
 
 # 卸载系统
 .PHONY: uninstall
 uninstall:
-	@echo "🗑️  卸载Claude CE 2.0系统..."
-	@rm -f $(BIN_DIR)/ce-inject
+	@echo "🗑️  卸载Claude Autopilot 2.1系统..."
+	@rm -f $(BIN_DIR)/claude-autopilot
+	@rm -f $(BIN_DIR)/setup.sh
+	@rm -f $(BIN_DIR)/quick-setup.sh
 	@rm -rf $(CONFIG_DIR)
 	@rm -rf $(LIB_DIR)
 	@echo "✅ 卸载完成"
@@ -81,8 +92,8 @@ uninstall:
 clean:
 	@echo "🧹 清理构建文件..."
 	@rm -rf $(BUILD_DIR)
-	@find . -name "*.bak" -delete
-	@find . -name "*~" -delete
+	@find . -name "*.bak" -delete 2>/dev/null || true
+	@find . -name "*~" -delete 2>/dev/null || true
 	@echo "✅ 清理完成"
 
 # 创建发布包
@@ -90,30 +101,35 @@ clean:
 package: lint test
 	@echo "📦 创建发布包..."
 	@mkdir -p $(BUILD_DIR)
-	@tar -czf $(BUILD_DIR)/claude-ce-v$(VERSION).tar.gz \
+	@tar -czf $(BUILD_DIR)/claude-autopilot-v$(VERSION).tar.gz \
 		--exclude='.git' \
 		--exclude='$(BUILD_DIR)' \
 		--exclude='memory.sqlite' \
 		--exclude='*.bak' \
-		bin/ config/ lib/ README.md CLAUDE.md Makefile VERSION
-	@echo "✅ 发布包已创建: $(BUILD_DIR)/claude-ce-v$(VERSION).tar.gz"
+		bin/ lib/ share/ README.md CLAUDE.md Makefile share/claude-autopilot/VERSION
+	@echo "✅ 发布包已创建: $(BUILD_DIR)/claude-autopilot-v$(VERSION).tar.gz"
 
 # 本地开发环境设置
 .PHONY: dev-setup
 dev-setup:
 	@echo "🔧 设置开发环境..."
-	@git config core.hooksPath .githooks
-	@chmod +x .githooks/*
 	@chmod +x bin/claude-autopilot
+	@chmod +x bin/*.sh
 	@chmod +x lib/*.sh
+	@chmod +x tests/*.sh 2>/dev/null || true
+	@chmod +x scripts/quality-check/*.sh 2>/dev/null || true
 	@echo "✅ 开发环境设置完成"
 
 # 项目健康度检查
 .PHONY: health-check
 health-check:
 	@echo "🏥 项目健康度检查..."
-	@./bin/claude-autopilot . --health-only 2>/dev/null || echo "需要先设置CE_INSTALL_PATH环境变量"
-	@echo "✅ 健康度检查完成"
+	@if [ -f scripts/quality-check/health-check.sh ]; then \
+		chmod +x scripts/quality-check/health-check.sh && \
+		scripts/quality-check/health-check.sh .; \
+	else \
+		echo "⚠️ 健康检查脚本未找到"; \
+	fi
 
 # 交互式配置（新手友好）
 .PHONY: setup
@@ -133,7 +149,8 @@ quick-setup:
 .PHONY: self-inject
 self-inject:
 	@echo "🎯 对当前项目应用智能注入..."
-	@./bin/claude-autopilot . bash-scripts
+	@chmod +x $(MAIN_SCRIPT)
+	@$(MAIN_SCRIPT) --target_dir . --project_type bash-scripts
 	@echo "✅ 智能注入完成"
 
 # 快速注入到指定项目 - 自动检测项目类型
@@ -146,7 +163,8 @@ inject:
 		exit 1; \
 	fi
 	@echo "🎯 智能注入到项目: $(PROJECT)"
-	@./bin/claude-autopilot "$(PROJECT)"
+	@chmod +x $(MAIN_SCRIPT)
+	@$(MAIN_SCRIPT) --target_dir "$(PROJECT)"
 	@echo "✅ 注入完成"
 
 # 快速注入到指定项目并指定类型
@@ -165,7 +183,8 @@ inject-type:
 		exit 1; \
 	fi
 	@echo "🎯 注入项目: $(PROJECT) (类型: $(TYPE))"
-	@./bin/claude-autopilot "$(PROJECT)" "$(TYPE)"
+	@chmod +x $(MAIN_SCRIPT)
+	@$(MAIN_SCRIPT) --target_dir "$(PROJECT)" --project_type "$(TYPE)"
 	@echo "✅ 注入完成"
 
 # 批量注入到多个项目
@@ -178,11 +197,12 @@ inject-batch:
 		exit 1; \
 	fi
 	@echo "🔄 批量注入到目录: $(PROJECTS_DIR)"
+	@chmod +x $(MAIN_SCRIPT)
 	@for project in "$(PROJECTS_DIR)"/*; do \
 		if [ -d "$$project" ]; then \
 			echo ""; \
 			echo "📂 处理项目: $$project"; \
-			./bin/claude-autopilot "$$project" || echo "⚠️ 跳过: $$project"; \
+			$(MAIN_SCRIPT) --target_dir "$project" || echo "⚠️ 跳过: $project"; \
 		fi; \
 	done
 	@echo "✅ 批量注入完成"

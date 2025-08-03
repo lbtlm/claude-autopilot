@@ -1,0 +1,1 @@
+../bin/quick-setup.sh

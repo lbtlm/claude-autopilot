@@ -449,6 +449,103 @@ handle_create_new_mode() {
     continue_create_project_flow
 }
 
+# 检查并修复project.json文件完整性
+validate_and_fix_project_json() {
+    local config_file="$1"
+    local needs_update=false
+    local temp_file="$config_file.tmp"
+    
+    echo "🔍 检查project.json文件完整性..."
+    
+    # 如果文件不存在，需要创建新的
+    if [ ! -f "$config_file" ]; then
+        echo "   ❌ project.json文件不存在，需要创建新文件"
+        return 1  # 返回1表示需要创建新文件
+    fi
+    
+    # 检查JSON文件是否有效
+    if ! jq . "$config_file" >/dev/null 2>&1; then
+        echo "   ❌ project.json文件格式无效，需要重新生成"
+        return 1  # 返回1表示需要创建新文件
+    fi
+    
+    # 检查必需字段
+    local existing_project_id=""
+    local existing_owner=""
+    local existing_project_owner=""
+    
+    if command -v jq >/dev/null 2>&1; then
+        existing_project_id=$(jq -r '.project_id // empty' "$config_file" 2>/dev/null)
+        existing_owner=$(jq -r '.owner // empty' "$config_file" 2>/dev/null)
+        existing_project_owner=$(jq -r '.project_owner // empty' "$config_file" 2>/dev/null)
+    fi
+    
+    # 检查project_id字段
+    if [ -z "$existing_project_id" ]; then
+        echo "   ⚠️ 缺少project_id字段，自动生成..."
+        new_project_id=$(generate_uuid7)
+        echo "   ✅ 生成新的project_id: $new_project_id"
+        needs_update=true
+    else
+        new_project_id="$existing_project_id"
+        echo "   ✅ project_id已存在: $new_project_id"
+    fi
+    
+    # 检查owner相关字段
+    local final_owner=""
+    if [ -n "$existing_owner" ]; then
+        final_owner="$existing_owner"
+        echo "   ✅ owner字段已存在: $final_owner"
+    elif [ -n "$existing_project_owner" ]; then
+        final_owner="$existing_project_owner"
+        echo "   ✅ project_owner字段已存在: $final_owner"
+    else
+        echo "   ⚠️ 缺少owner/project_owner字段"
+        # 尝试从系统获取用户名
+        if [ -n "$USER" ]; then
+            final_owner="$USER"
+        elif [ -n "$USERNAME" ]; then
+            final_owner="$USERNAME"
+        elif command -v whoami >/dev/null 2>&1; then
+            final_owner=$(whoami)
+        else
+            final_owner="$new_project_id"
+        fi
+        echo "   ✅ 自动设置owner: $final_owner"
+        needs_update=true
+    fi
+    
+    # 如果需要更新，使用jq更新JSON文件
+    if [ "$needs_update" = true ]; then
+        echo "   🔧 更新project.json文件..."
+        
+        if command -v jq >/dev/null 2>&1; then
+            # 使用jq更新JSON，保持其他字段不变
+            jq --arg project_id "$new_project_id" \
+               --arg owner "$final_owner" \
+               --arg project_owner "$final_owner" \
+               '. + {"project_id": $project_id, "project_owner": $project_owner} | if .owner then . else . + {"owner": $owner} end' \
+               "$config_file" > "$temp_file"
+            
+            if [ $? -eq 0 ]; then
+                mv "$temp_file" "$config_file"
+                echo "   ✅ project.json文件已更新"
+            else
+                echo "   ❌ 更新project.json文件失败"
+                rm -f "$temp_file"
+                return 1
+            fi
+        else
+            echo "   ❌ 需要jq工具来更新JSON文件，建议重新生成"
+            return 1
+        fi
+    else
+        echo "   ✅ project.json文件完整性检查通过"
+    fi
+    
+    return 0  # 返回0表示文件有效且完整
+}
+
 # 函数定义：处理INJECT_EXISTING模式  
 handle_inject_existing_mode() {
     echo "🔄 现有项目注入模式"
@@ -457,6 +554,15 @@ handle_inject_existing_mode() {
     # 读取现有项目配置
     EXISTING_CONFIG="$TARGET_DIR/.claude/project.json"
     EXISTING_CLAUDE_MD="$TARGET_DIR/CLAUDE.md"
+    
+    # 首先检查并修复project.json文件完整性
+    mkdir -p "$TARGET_DIR/.claude"  # 确保.claude目录存在
+    
+    if ! validate_and_fix_project_json "$EXISTING_CONFIG"; then
+        echo "   🔄 project.json文件需要重新生成，转入创建模式..."
+        handle_create_new_mode
+        return
+    fi
     
     EXISTING_PROJECT_TYPE=""
     EXISTING_OWNER=""
@@ -743,10 +849,10 @@ generate_project_config() {
     cat > "$TARGET_DIR/.claude/project.json" << EOF
 {
   "project_id": "$PROJECT_ID",
+  "project_owner": "$FINAL_OWNER",
   "project_name": "$PROJECT_NAME",
   "project_type": "$FINAL_PROJECT_TYPE",
   "tech_stack": "$TECH_STACK",
-  "owner": "$FINAL_OWNER",
   "global_ce_path": "$GLOBAL_CE_PATH",
   "auto_load_context": true,
   "enabled_workflows": [

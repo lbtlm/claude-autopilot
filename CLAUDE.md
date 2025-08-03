@@ -49,6 +49,22 @@
 # 提交到GitHub / Commit to GitHub
 /提交github
 # OR /commit-github
+
+# 智能Docker部署 / Smart Docker Deploy
+/智能Docker部署
+# OR /smart-docker-deploy
+
+# 智能项目规划 / Smart Project Planning
+/智能项目规划
+# OR /smart-project-planning
+
+# 智能结构验证 / Smart Structure Validation
+/智能结构验证
+# OR /smart-structure-validation
+
+# 智能工作总结 / Smart Work Summary
+/智能工作总结
+# OR /smart-work-summary
 ```
 
 ### **🐚 Bash脚本开发特色功能**

@@ -4,7 +4,7 @@
   "project_name": "claude-autopilot",
   "project_type": "bash-scripts",
   "tech_stack": "bash-scripts + Make + Tests",
-  "global_ce_path": "/home/youmisam/claude-autopilot/share/claude-autopilot",
+  "global_ce_path": "/Users/samsmith/go-project/claude-autopilot/share/claude-autopilot",
   "auto_load_context": true,
   "enabled_workflows": [
     "smart-feature-dev",
@@ -18,7 +18,11 @@
     "smart-code-refactor",
     "project-status-analysis",
     "cleanup-project",
-    "commit-github"
+    "commit-github",
+    "smart-docker-deploy",
+    "smart-project-planning",
+    "smart-structure-validation",
+    "smart-work-summary"
   ],
   "quality_gates": {
     "lint_command": "make lint",

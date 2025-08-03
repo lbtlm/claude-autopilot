@@ -1,38 +1,58 @@
 #!/bin/bash
 
-# 中文命令包装脚本
-# 将中文命令转换为英文文件名并执行
+# Claude Autopilot 中文命令包装器
+# 提供中文别名命令支持
 
-# 动态检测Claude Autopilot路径
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_CE_PATH="$(dirname "$SCRIPT_DIR")"
-source "$GLOBAL_CE_PATH/utils/alias-resolver.sh"
+# 颜色定义
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+NC='\033[0m' # No Color
 
-# 解析中文命令
-CHINESE_COMMAND="$1"
-shift  # 移除第一个参数，保留其余参数
+# 显示可用的中文命令
+show_chinese_commands() {
+    echo -e "${CYAN}🇨🇳 Claude Autopilot 中文智能命令${NC}"
+    echo "================================================"
+    echo ""
+    echo -e "${GREEN}📋 核心开发命令：${NC}"
+    echo "  /智能功能开发 <功能描述>        - 完整功能开发流程"
+    echo "  /智能Bug修复 <问题描述>         - 智能问题诊断和修复"  
+    echo "  /智能代码重构 <重构目标>       - 基于最佳实践的重构"
+    echo ""
+    echo -e "${GREEN}🛠️ 项目管理命令：${NC}"
+    echo "  /加载全局上下文               - 重新加载项目上下文"
+    echo "  /项目状态分析                 - 全面项目健康度分析"
+    echo "  /清理残余文件                 - 智能清理项目文件"
+    echo "  /提交github                   - 智能Git提交"
+    echo ""
+    echo -e "${GREEN}🚀 高级功能命令：${NC}"
+    echo "  /智能Docker部署               - Docker容器化部署"
+    echo "  /智能项目规划                 - 项目架构规划"
+    echo "  /智能结构验证                 - 项目结构验证"
+    echo "  /智能工作总结                 - 生成工作报告"
+    echo ""
+    echo -e "${YELLOW}💡 使用提示：${NC}"
+    echo "  - 直接在Claude Code中输入中文命令即可"
+    echo "  - 例如：/智能功能开发 用户登录功能"
+    echo "  - 所有命令都支持详细的中文描述"
+    echo ""
+}
 
-# 解析为英文文件名
-ENGLISH_COMMAND=$(resolve_command_alias "$CHINESE_COMMAND")
+# 主函数
+main() {
+    case "$1" in
+        "help"|"帮助"|"")
+            show_chinese_commands
+            ;;
+        *)
+            show_chinese_commands
+            ;;
+    esac
+}
 
-if [ "$ENGLISH_COMMAND" = "$CHINESE_COMMAND" ]; then
-    echo "⚠️ 未找到命令映射: $CHINESE_COMMAND"
-    echo "可用命令请查看: .claude/commands/"
-    exit 1
+# 如果作为脚本直接运行
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
 fi
-
-# 查找对应的命令文件
-COMMAND_FILE=$(check_command_file_exists "$CHINESE_COMMAND")
-
-if [ $? -ne 0 ]; then
-    echo "❌ 命令文件不存在: $CHINESE_COMMAND"
-    exit 1
-fi
-
-# 显示正在执行的命令
-echo "🎯 执行命令: $CHINESE_COMMAND -> $ENGLISH_COMMAND"
-echo "📄 文件: $COMMAND_FILE"
-
-# 这里可以添加实际的命令执行逻辑
-# 例如：解析markdown文件并执行其中的脚本
-echo "✅ 命令映射成功"

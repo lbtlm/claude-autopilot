@@ -1,20 +1,21 @@
 # Claude Autopilot 2.1 - 智能开发环境自动配置工具
 
 **🌐 语言版本 | Language Versions**
+
 - [简体中文](README.md) | [繁體中文](README-TW.md) | [English](README-EN.md)
 
-> 🛩️ 让Claude驾驶您的开发过程，一键式AI协作开发环境配置，支持多种项目类型的自动化智能配置
+> 🛩️ 让 Claude 驾驶您的开发过程，一键式 AI 协作开发环境配置，支持多种项目类型的自动化智能配置
 
 ## 📋 项目简介
 
-Claude Autopilot 2.1 是一个开源的智能开发环境配置工具，专为现代开发者设计。通过简单的命令行操作，让Claude自动驾驶您的项目配置过程，为项目配置完美的AI协作开发环境，支持多种编程语言和框架。
+Claude Autopilot 2.1 是一个开源的智能开发环境配置工具，专为现代开发者设计。通过简单的命令行操作，让 Claude 自动驾驶您的项目配置过程，为项目配置完美的 AI 协作开发环境，支持多种编程语言和框架。
 
 ### ✨ 核心特性
 
-- 🛩️ **自动驾驶配置** - 让Claude接管项目配置，解放双手
+- 🛩️ **自动驾驶配置** - 让 Claude 接管项目配置，解放双手
 - 🤖 **智能检测** - 自动识别项目类型和技术栈
 - 🌍 **开源友好** - 支持任意路径部署，无硬编码依赖
-- 📚 **多语言支持** - 支持Go、JavaScript、Python、Bash等多种语言
+- 📚 **多语言支持** - 支持 Go、JavaScript、Python、Bash 等多种语言
 - 🔧 **开箱即用** - 无需复杂配置，即装即用
 
 ## 📋 系统要求
@@ -22,6 +23,7 @@ Claude Autopilot 2.1 是一个开源的智能开发环境配置工具，专为�
 ### 🛠️ 必需依赖
 
 #### 1. **Claude Code CLI** (必需)
+
 Claude Autopilot 2.1 依赖 Claude Code CLI 进行智能开发：
 
 ```bash
@@ -38,7 +40,8 @@ claude --version
 ```
 
 #### 2. **MCP (Model Context Protocol) 服务器** (可选但推荐)
-为了获得最佳智能开发体验，建议安装以下MCP服务器：
+
+为了获得最佳智能开发体验，建议安装以下 MCP 服务器：
 
 **🧠 核心智能工具包：**
 
@@ -49,14 +52,14 @@ npm install -g @mcp/sequential-thinking
 # 2. Context7 - 动态技术文档获取
 npm install -g @mcp/context7
 
-# 3. Memory - 开发经验记忆和复用
-npm install -g @mcp/memory
+# 3. FileSystem - 文件系统智能分析
+npm install -g @mcp/filesystem
 
 # 4. Puppeteer - Web项目自动化测试 (可选)
 npm install -g @mcp/puppeteer
 ```
 
-**📦 MCP服务器配置 (在Claude Code中)：**
+**📦 MCP 服务器配置 (在 Claude Code 中)：**
 
 创建或更新 `~/.claude/mcp-servers.json`：
 
@@ -68,12 +71,18 @@ npm install -g @mcp/puppeteer
       "args": ["@mcp/sequential-thinking"]
     },
     "context7": {
-      "command": "npx", 
+      "command": "npx",
       "args": ["@mcp/context7"]
     },
-    "memory": {
+    "filesystem": {
       "command": "npx",
-      "args": ["@mcp/memory"]
+      "args": ["@mcp/filesystem"],
+      "options": {
+        "stdio": "inherit"
+      },
+      "env": {
+        "MCP_FILESYSTEM_ROOT": "/path/to/your/projects"
+      }
     },
     "puppeteer": {
       "command": "npx",
@@ -83,9 +92,10 @@ npm install -g @mcp/puppeteer
 }
 ```
 
-**⚠️ 注意**：MCP服务器包名和配置方式以官方文档为准，上述仅为示例。
+**⚠️ 注意**：MCP 服务器包名和配置方式以官方文档为准，上述仅为示例。
 
 #### 3. **系统工具**
+
 ```bash
 # Ubuntu/Debian
 sudo apt update
@@ -134,7 +144,7 @@ make dev-setup
 
 #### 🪟 Windows 用户
 
-**推荐方式 - 使用WSL (Windows Subsystem for Linux):**
+**推荐方式 - 使用 WSL (Windows Subsystem for Linux):**
 
 ```bash
 # 1. 安装WSL2 (如果未安装)
@@ -147,7 +157,7 @@ cd claude-autopilot
 make dev-setup
 ```
 
-**备选方式 - 使用Git Bash:**
+**备选方式 - 使用 Git Bash:**
 
 ```bash
 # 1. 安装Git for Windows (包含Git Bash)
@@ -161,13 +171,14 @@ chmod +x lib/*.sh
 ```
 
 **注意事项:**
-- ⚠️ 不支持纯Windows Command Prompt或PowerShell
-- ✅ 推荐使用WSL2获得最佳兼容性
-- ⚡ Git Bash可以运行，但某些功能可能受限
+
+- ⚠️ 不支持纯 Windows Command Prompt 或 PowerShell
+- ✅ 推荐使用 WSL2 获得最佳兼容性
+- ⚡ Git Bash 可以运行，但某些功能可能受限
 
 ### 2. 基本使用
 
-**🎯 推荐方式 - 使用Makefile（最简单）：**
+**🎯 推荐方式 - 使用 Makefile（最简单）：**
 
 ```bash
 # 交互式配置（新手友好）
@@ -199,7 +210,7 @@ make inject-type PROJECT=/path/to/new/project TYPE=gin-microservice
 
 Claude Autopilot 2.1 提供了三种使用方式，从简单到高级：
 
-#### 方式1: Makefile命令（⭐ 推荐）
+#### 方式 1: Makefile 命令（⭐ 推荐）
 
 **最简单的使用方式，一键完成所有操作：**
 
@@ -222,7 +233,7 @@ make test                                            # 运行测试
 make dev-setup                                       # 设置开发环境
 ```
 
-#### 方式2: 直接使用脚本
+#### 方式 2: 直接使用脚本
 
 **适合需要更多控制的高级用户：**
 
@@ -237,7 +248,7 @@ make dev-setup                                       # 设置开发环境
 ./scripts/project-management/new_project.sh         # 新项目创建
 ```
 
-#### 方式3: 系统安装（可选）
+#### 方式 3: 系统安装（可选）
 
 **安装到系统后全局使用：**
 
@@ -252,25 +263,25 @@ setup.sh                                            # 全局交互式配置
 
 ### 🏷️ 支持的项目类型
 
-| 项目类型 | 说明 | 技术栈 |
-|---------|------|--------|
-| `gin-microservice` | Go微服务 | Go + Gin + 数据库 |
-| `gin-vue3` | 全栈应用 | Go + Gin + Vue3 |
-| `vue3-frontend` | Vue3前端 | Vue3 + TypeScript + Vite |
-| `react-frontend` | React前端 | React + TypeScript |
-| `nextjs-frontend` | Next.js应用 | Next.js + React |
-| `nodejs-general` | Node.js应用 | Node.js + Express |
-| `python-web` | Python Web | FastAPI/Flask/Django |
-| `python-desktop` | Python桌面 | tkinter/PyQt |
-| `bash-scripts` | Bash脚本 | Shell Scripts |
-| `java-maven` | Java Maven | Java + Maven |
-| `java-gradle` | Java Gradle | Java + Gradle |
-| `rust-project` | Rust项目 | Rust + Cargo |
-| `php-project` | PHP项目 | PHP + Composer |
+| 项目类型           | 说明         | 技术栈                   |
+| ------------------ | ------------ | ------------------------ |
+| `gin-microservice` | Go 微服务    | Go + Gin + 数据库        |
+| `gin-vue3`         | 全栈应用     | Go + Gin + Vue3          |
+| `vue3-frontend`    | Vue3 前端    | Vue3 + TypeScript + Vite |
+| `react-frontend`   | React 前端   | React + TypeScript       |
+| `nextjs-frontend`  | Next.js 应用 | Next.js + React          |
+| `nodejs-general`   | Node.js 应用 | Node.js + Express        |
+| `python-web`       | Python Web   | FastAPI/Flask/Django     |
+| `python-desktop`   | Python 桌面  | tkinter/PyQt             |
+| `bash-scripts`     | Bash 脚本    | Shell Scripts            |
+| `java-maven`       | Java Maven   | Java + Maven             |
+| `java-gradle`      | Java Gradle  | Java + Gradle            |
+| `rust-project`     | Rust 项目    | Rust + Cargo             |
+| `php-project`      | PHP 项目     | PHP + Composer           |
 
 ### 🎯 使用场景
 
-#### 场景1：新项目创建
+#### 场景 1：新项目创建
 
 ```bash
 # 🎯 使用Makefile（推荐）
@@ -282,7 +293,7 @@ make inject-type PROJECT=my-vue3-app TYPE=vue3       # 直接创建
 mkdir my-vue3-app && ./scripts/quick-setup.sh my-vue3-app vue3-frontend
 ```
 
-#### 场景2：现有项目配置
+#### 场景 2：现有项目配置
 
 ```bash
 # 🎯 使用Makefile（推荐）
@@ -293,7 +304,7 @@ cd /path/to/existing/project
 ./scripts/quick-setup.sh .
 ```
 
-#### 场景3：多项目批量配置
+#### 场景 3：多项目批量配置
 
 ```bash
 # 🎯 使用Makefile（推荐）
@@ -339,7 +350,7 @@ your-project/
 
 ### 🎯 可用的智能命令
 
-配置完成后，在Claude Code中可以使用以下智能命令：
+配置完成后，在 Claude Code 中可以使用以下智能命令：
 
 ## 🚀 **核心开发命令** - 日常开发必备
 
@@ -358,6 +369,7 @@ your-project/
 ```
 
 **功能特点:**
+
 - ✨ 自动分析功能需求并拆解任务
 - 🏗️ 生成符合项目架构的代码结构
 - 🧪 创建相关测试文件
@@ -365,7 +377,7 @@ your-project/
 
 ---
 
-### 2. 🐛 智能Bug修复 `/智能Bug修复` 或 `/smart-bugfix`
+### 2. 🐛 智能 Bug 修复 `/智能Bug修复` 或 `/smart-bugfix`
 
 **快速诊断和修复代码问题，支持多种编程语言**
 
@@ -380,6 +392,7 @@ your-project/
 ```
 
 **功能特点:**
+
 - 🔍 智能代码分析和问题定位
 - 🛠️ 提供多种修复方案
 - 📊 性能优化建议
@@ -402,6 +415,7 @@ your-project/
 ```
 
 **功能特点:**
+
 - 🎯 遵循代码最佳实践
 - ⚡ 性能优化建议
 - 🧹 代码清理和规范化
@@ -413,7 +427,7 @@ your-project/
 
 ### 4. 🔄 加载全局上下文 `/加载全局上下文` 或 `/load-global-context`
 
-**重新加载Claude Autopilot环境和项目上下文**
+**重新加载 Claude Autopilot 环境和项目上下文**
 
 ```bash
 # 基础用法
@@ -426,6 +440,7 @@ your-project/
 ```
 
 **使用场景:**
+
 - 🔧 更新项目配置后
 - 🚨 命令无法识别时
 - 📝 修改项目类型后
@@ -448,6 +463,7 @@ your-project/
 ```
 
 **分析内容:**
+
 - 🏗️ 项目架构合规性
 - 📦 依赖版本和安全性
 - 🧪 测试覆盖率分析
@@ -458,7 +474,7 @@ your-project/
 
 ### 6. 🧹 项目清理重组 `/清理残余文件` 或 `/cleanup-project`
 
-**智能清理项目文件，符合GNU编码标准**
+**智能清理项目文件，符合 GNU 编码标准**
 
 ```bash
 # 完整交互式清理
@@ -476,6 +492,7 @@ your-project/
 ```
 
 **清理内容:**
+
 - 🗑️ 临时文件和缓存
 - 📁 非标准目录结构
 - 🔄 重复和冗余文件
@@ -484,9 +501,9 @@ your-project/
 
 ---
 
-### 7. 📤 提交到GitHub `/提交github` 或 `/commit-github`
+### 7. 📤 提交到 GitHub `/提交github` 或 `/commit-github`
 
-**智能Git提交，生成规范的提交信息**
+**智能 Git 提交，生成规范的提交信息**
 
 ```bash
 # 基础用法
@@ -499,8 +516,9 @@ your-project/
 ```
 
 **功能特点:**
+
 - 📝 自动分析代码变更
-- 🎯 生成符合Conventional Commits规范的提交信息
+- 🎯 生成符合 Conventional Commits 规范的提交信息
 - 🔍 代码质量检查
 - 🚀 自动推送到远程仓库
 
@@ -509,22 +527,25 @@ your-project/
 ## 💡 **使用技巧**
 
 ### 🎯 **快速上手**
+
 1. **新项目开发**: 使用 `/智能功能开发` 快速创建功能
-2. **问题解决**: 遇到bug时使用 `/智能Bug修复`
+2. **问题解决**: 遇到 bug 时使用 `/智能Bug修复`
 3. **代码优化**: 定期使用 `/智能代码重构` 改进代码质量
 4. **项目维护**: 使用 `/项目状态分析` 和 `/清理残余文件` 保持项目健康
 
 ### 🔄 **命令组合使用**
+
 ```bash
 # 完整开发流程示例
 1. /项目状态分析                    # 分析项目当前状态
-2. /智能功能开发 新功能需求          # 开发新功能  
+2. /智能功能开发 新功能需求          # 开发新功能
 3. /智能代码重构 优化新功能          # 重构和优化
 4. /清理残余文件                   # 清理临时文件
 5. /提交github                     # 提交代码
 ```
 
 ### 📝 **最佳实践**
+
 - ✅ 详细描述需求，获得更准确的结果
 - ✅ 定期使用项目维护命令
 - ✅ 组合使用多个命令完成复杂任务
@@ -532,18 +553,20 @@ your-project/
 
 ### 🚀 开始使用
 
-1. **启动Claude Code**：
+1. **启动 Claude Code**：
+
    ```bash
    cd your-project
    claude code
    ```
 
 2. **直接描述需求**：
+
    - "帮我创建用户登录功能"
    - "优化数据库查询性能"
    - "添加单元测试"
 
-3. **享受Claude驾驶的智能开发体验**！
+3. **享受 Claude 驾驶的智能开发体验**！
 
 ## 📁 项目结构详解
 
@@ -583,16 +606,19 @@ claude-autopilot/
 ### 🎯 核心组件说明
 
 #### 1. **scripts/ - 脚本入口目录**
+
 - **setup.sh** - 交互式配置，适合新手，提供友好的菜单界面
 - **quick-setup.sh** - 快速配置，适合熟练用户，命令行直接使用
 - **ce-inject.sh** - 核心注入引擎，所有配置逻辑的实现
 
 #### 2. **share/claude-autopilot/ - 智能引擎核心**
+
 - **project-types/** - 各种项目类型的配置模板和最佳实践
 - **commands/** - 智能命令链接，支持中英文命令
 - **utils/** - 核心工具函数，提供可复用的功能模块
 
 #### 3. **Makefile - 统一接口**
+
 - 提供所有功能的统一入口点
 - 自动处理脚本权限和依赖
 - 支持从简单到高级的各种使用场景
@@ -619,7 +645,7 @@ claude-autopilot/
 
 ### 💡 设计理念
 
-- **🛩️ 自动驾驶优先** - 让Claude接管重复性配置工作
+- **🛩️ 自动驾驶优先** - 让 Claude 接管重复性配置工作
 - **🔧 灵活配置** - 高级用户可以直接调用脚本获得更多控制
 - **🧠 智能感知** - 自动检测项目类型和技术栈
 - **🌍 开源友好** - 无硬编码路径，支持任意环境部署
@@ -674,7 +700,7 @@ export CE_TEMPLATE_DIR="/custom/templates"
 2. 创建功能分支：`git checkout -b feature/amazing-feature`
 3. 提交更改：`git commit -m 'Add amazing feature'`
 4. 推送分支：`git push origin feature/amazing-feature`
-5. 提交Pull Request
+5. 提交 Pull Request
 
 ### 开发环境设置
 
@@ -691,13 +717,14 @@ export CE_TEMPLATE_DIR="/custom/templates"
 
 ### 🪟 Windows 兼容性问题
 
-#### **Q: 在Windows上运行脚本时出现 "chmod: command not found" 错误**
+#### **Q: 在 Windows 上运行脚本时出现 "chmod: command not found" 错误**
 
 **症状**: 脚本执行时显示 `chmod: command not found` 或权限相关错误
 
 **解决方案**:
 
-1. **推荐 - 使用WSL2 (最佳体验)**:
+1. **推荐 - 使用 WSL2 (最佳体验)**:
+
    ```bash
    # 安装WSL2后，在Ubuntu环境中运行
    wsl
@@ -705,14 +732,15 @@ export CE_TEMPLATE_DIR="/custom/templates"
    make dev-setup
    ```
 
-2. **备选 - 使用Git Bash**:
+2. **备选 - 使用 Git Bash**:
+
    ```bash
    # 在Git Bash中手动设置权限
    find scripts/ -name "*.sh" -exec chmod +x {} \;
    find lib/ -name "*.sh" -exec chmod +x {} \;
    ```
 
-3. **Git配置优化 (一次性设置)**:
+3. **Git 配置优化 (一次性设置)**:
    ```bash
    # 在项目目录中运行
    git config core.filemode false
@@ -721,18 +749,20 @@ export CE_TEMPLATE_DIR="/custom/templates"
    git update-index --chmod=+x bin/claude-autopilot
    ```
 
-#### **Q: 脚本在PowerShell中无法运行**
+#### **Q: 脚本在 PowerShell 中无法运行**
 
-**症状**: 脚本无法在Windows PowerShell或Command Prompt中执行
+**症状**: 脚本无法在 Windows PowerShell 或 Command Prompt 中执行
 
-**解决方案**: 不支持纯Windows环境，请使用以下方式之一:
-- ✅ **WSL2** (推荐): 完全兼容Linux环境
+**解决方案**: 不支持纯 Windows 环境，请使用以下方式之一:
+
+- ✅ **WSL2** (推荐): 完全兼容 Linux 环境
 - ✅ **Git Bash**: 基本功能可用
 - ❌ **PowerShell/CMD**: 不支持
 
 ### 🐧 Linux/macOS 常见问题
 
 **Q: 脚本没有执行权限**
+
 ```bash
 # 自动设置所有脚本权限
 make dev-setup
@@ -742,7 +772,8 @@ chmod +x scripts/*.sh
 chmod +x lib/*.sh
 ```
 
-**Q: 找不到ce-inject脚本**
+**Q: 找不到 ce-inject 脚本**
+
 ```bash
 # 确保项目完整克隆
 git clone --recurse-submodules https://github.com/lbtlm/claude-autopilot.git
@@ -752,6 +783,7 @@ ls -la bin/claude-autopilot
 ```
 
 **Q: 项目类型检测失败**
+
 ```bash
 # 手动指定项目类型
 ./scripts/quick-setup.sh /path/to/project your-project-type
@@ -762,7 +794,8 @@ ls share/claude-autopilot/project-types/
 
 ### 🔧 通用问题解决
 
-**Q: Makefile命令不工作**
+**Q: Makefile 命令不工作**
+
 ```bash
 # 检查make是否安装
 which make
@@ -775,6 +808,7 @@ xcode-select --install
 ```
 
 **Q: 脚本执行权限问题持续存在**
+
 ```bash
 # 强制重置所有权限
 find . -name "*.sh" -exec chmod +x {} \;
@@ -783,7 +817,8 @@ find . -name "*.sh" -exec chmod +x {} \;
 mount | grep "your-drive"
 ```
 
-**Q: 项目配置后Claude Code无法识别**
+**Q: 项目配置后 Claude Code 无法识别**
+
 ```bash
 # 检查配置文件是否正确生成
 ls -la .claude/
@@ -807,18 +842,19 @@ make quick-setup
 
 ### 📊 兼容性矩阵
 
-| 平台环境 | 兼容性 | 功能完整度 | 推荐等级 | 说明 |
-|---------|--------|-----------|----------|------|
-| 🐧 **Linux (Ubuntu/Debian/CentOS)** | ✅ 完全支持 | 100% | ⭐⭐⭐⭐⭐ | 原生支持，最佳性能 |
-| 🍎 **macOS** | ✅ 完全支持 | 100% | ⭐⭐⭐⭐⭐ | 原生支持，优秀体验 |
-| 🪟 **Windows + WSL2** | ✅ 完全支持 | 95% | ⭐⭐⭐⭐⭐ | 推荐方案，几乎原生体验 |
-| 🪟 **Windows + Git Bash** | ⚠️ 基本支持 | 80% | ⭐⭐⭐ | 可用，部分功能受限 |
-| 🪟 **Windows PowerShell** | ❌ 不支持 | 0% | ❌ | Bash脚本无法运行 |
-| 🪟 **Windows Command Prompt** | ❌ 不支持 | 0% | ❌ | Bash脚本无法运行 |
+| 平台环境                            | 兼容性      | 功能完整度 | 推荐等级   | 说明                   |
+| ----------------------------------- | ----------- | ---------- | ---------- | ---------------------- |
+| 🐧 **Linux (Ubuntu/Debian/CentOS)** | ✅ 完全支持 | 100%       | ⭐⭐⭐⭐⭐ | 原生支持，最佳性能     |
+| 🍎 **macOS**                        | ✅ 完全支持 | 100%       | ⭐⭐⭐⭐⭐ | 原生支持，优秀体验     |
+| 🪟 **Windows + WSL2**               | ✅ 完全支持 | 95%        | ⭐⭐⭐⭐⭐ | 推荐方案，几乎原生体验 |
+| 🪟 **Windows + Git Bash**           | ⚠️ 基本支持 | 80%        | ⭐⭐⭐     | 可用，部分功能受限     |
+| 🪟 **Windows PowerShell**           | ❌ 不支持   | 0%         | ❌         | Bash 脚本无法运行      |
+| 🪟 **Windows Command Prompt**       | ❌ 不支持   | 0%         | ❌         | Bash 脚本无法运行      |
 
 ### 🎯 Windows 用户建议
 
 #### **最佳实践 - WSL2 环境**
+
 ```bash
 # 1. 启用WSL功能 (PowerShell管理员)
 Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux
@@ -835,6 +871,7 @@ make dev-setup
 ```
 
 #### **备选方案 - Git Bash**
+
 ```bash
 # 功能受限，但基本可用
 # 注意: 某些高级功能可能不工作
@@ -844,12 +881,12 @@ chmod +x scripts/*.sh
 
 ### ⚡ 性能对比
 
-| 环境 | 启动速度 | 执行效率 | 稳定性 | 开发体验 |
-|-----|---------|----------|--------|----------|
-| Linux原生 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 |
-| macOS原生 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 |
-| WSL2 | 🚀🚀🚀🚀 | 🚀🚀🚀🚀 | 🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 |
-| Git Bash | 🚀🚀🚀 | 🚀🚀🚀 | 🚀🚀🚀 | 🚀🚀🚀 |
+| 环境       | 启动速度   | 执行效率   | 稳定性     | 开发体验   |
+| ---------- | ---------- | ---------- | ---------- | ---------- |
+| Linux 原生 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 |
+| macOS 原生 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 | 🚀🚀🚀🚀🚀 |
+| WSL2       | 🚀🚀🚀🚀   | 🚀🚀🚀🚀   | 🚀🚀🚀🚀   | 🚀🚀🚀🚀🚀 |
+| Git Bash   | 🚀🚀🚀     | 🚀🚀🚀     | 🚀🚀🚀     | 🚀🚀🚀     |
 
 ---
 
@@ -858,26 +895,30 @@ chmod +x scripts/*.sh
 ### 📈 项目路线图
 
 - ✅ **v2.0 - 核心功能** (前一版本)
-  - 多项目类型支持 (18种主流技术栈)
+
+  - 多项目类型支持 (18 种主流技术栈)
   - 智能命令系统 (中英文双语)
   - 跨平台兼容性 (Linux/macOS/Windows WSL)
 
 - ✅ **v2.1 - Claude Autopilot** (当前版本)
-  - 品牌升级为Claude Autopilot
+
+  - 品牌升级为 Claude Autopilot
   - 增强的文档系统 (多语言支持)
-  - 改进的Windows兼容性
+  - 改进的 Windows 兼容性
   - 优化的智能命令系统
 
 - 🚧 **v2.2 - 扩展模板** (开发中)
+
   - 更多前端框架支持 (Svelte, Angular)
   - 移动开发模板 (React Native, Flutter)
   - 微服务架构模板 (Docker Compose, Kubernetes)
   - 数据科学模板 (Jupyter, MLOps)
 
 - 🎯 **v2.3 - 智能增强** (计划中)
-  - AI驱动的项目结构优化
+
+  - AI 驱动的项目结构优化
   - 自动依赖管理和版本检查
-  - 集成CI/CD pipeline生成
+  - 集成 CI/CD pipeline 生成
   - 代码质量自动化检查
 
 - 🔮 **v3.0 - 社区驱动** (远期规划)
@@ -891,22 +932,24 @@ chmod +x scripts/*.sh
 我们欢迎社区贡献新的项目模板！如果您希望添加新的项目类型支持：
 
 1. **模板贡献流程**:
+
    ```bash
    # 1. Fork 本项目
    git clone https://github.com/lbtlm/claude-autopilot.git
-   
+
    # 2. 创建新的项目类型模板
    cp share/claude-autopilot/project-types/gin-microservice.md \
       share/claude-autopilot/project-types/your-new-type.md
-   
+
    # 3. 根据您的技术栈调整模板内容
    vim share/claude-autopilot/project-types/your-new-type.md
-   
+
    # 4. 提交Pull Request
    ```
 
 2. **模板标准**:
-   - 使用Markdown格式
+
+   - 使用 Markdown 格式
    - 包含完整的项目结构说明
    - 提供技术栈特定的最佳实践
    - 包含适当的依赖和工具配置
@@ -920,6 +963,6 @@ chmod +x scripts/*.sh
 
 ---
 
-**让Claude驾驶您的开发过程，享受智能开发的未来！** ✨
+**让 Claude 驾驶您的开发过程，享受智能开发的未来！** ✨
 
-*基于MIT许可证开源，欢迎贡献和改进。*
+_基于 MIT 许可证开源，欢迎贡献和改进。_

@@ -1,19 +1,21 @@
-# CLAUDE.md - Bash脚本项目智能协作指南
+# CLAUDE.md - Bash 脚本项目智能协作指南
 
-## 🚀 **智能Claude Autopilot 2.1 已激活**
+## 🚀 **智能 Claude Autopilot 2.1 已激活**
 
-本项目已集成智能Claude Autopilot 2.1系统，专为Bash脚本项目优化的完整智能开发工作流程。
+本项目已集成智能 Claude Autopilot 2.1 系统，专为 Bash 脚本项目优化的完整智能开发工作流程。
 
 ### **📊 项目信息**
+
 - **项目名称**: claude-autopilot
-- **项目类型**: Bash脚本项目
-- **技术栈**: bash-scripts + Make + Tests  
-- **CE版本**: 2.0.0
+- **项目类型**: Bash 脚本项目
+- **技术栈**: bash-scripts + Make + Tests
+- **CE 版本**: 2.0.0
 - **配置时间**: 2025-07-28 16:31:30
 
 ### **🎯 智能命令**
 
 #### **核心开发流程**
+
 ```bash
 # 一键式完整功能开发 / Smart Feature Development
 /智能功能开发 <功能需求描述>
@@ -23,12 +25,13 @@
 /智能Bug修复 <问题描述>
 # OR /smart-bugfix <problem description>
 
-# 基于最佳实践的智能重构 / Smart Code Refactor  
+# 基于最佳实践的智能重构 / Smart Code Refactor
 /智能代码重构 <重构目标>
 # OR /smart-code-refactor <refactor target>
 ```
 
 #### **辅助工具命令**
+
 ```bash
 # 重新加载全局上下文和经验 / Load Global Context
 /加载全局上下文
@@ -67,27 +70,31 @@
 # OR /smart-work-summary
 ```
 
-### **🐚 Bash脚本开发特色功能**
+### **🐚 Bash 脚本开发特色功能**
 
 #### **脚本质量优化**
-- **Shell脚本规范检查**: ShellCheck集成和最佳实践应用
-- **错误处理优化**: set -euo pipefail和完善的错误处理机制
+
+- **Shell 脚本规范检查**: ShellCheck 集成和最佳实践应用
+- **错误处理优化**: set -euo pipefail 和完善的错误处理机制
 - **参数验证智能**: 输入参数验证和帮助文档自动生成
-- **跨平台兼容性**: Linux/macOS/Windows WSL兼容性检查
+- **跨平台兼容性**: Linux/macOS/Windows WSL 兼容性检查
 
 #### **项目结构管理**
+
 - **模块化设计**: 脚本功能模块化和库函数复用
 - **配置管理**: 环境变量和配置文件管理最佳实践
 - **日志记录系统**: 统一的日志记录和错误跟踪
-- **测试框架集成**: Bash单元测试和集成测试
+- **测试框架集成**: Bash 单元测试和集成测试
 
 #### **部署和分发**
+
 - **权限管理**: 执行权限和安全策略配置
 - **包管理**: 脚本打包和版本管理
 - **依赖检查**: 系统依赖和工具检查自动化
 - **安装脚本**: 一键安装和卸载脚本生成
 
-#### **标准项目结构支持 (基于GNU编码标准)**
+#### **标准项目结构支持 (基于 GNU 编码标准)**
+
 ```
 bash-scripts项目/
 ├── bin/                          # 可执行脚本 (GNU标准)
@@ -123,6 +130,7 @@ bash-scripts项目/
 ```
 
 #### **智能开发和测试**
+
 ```bash
 # 开发环境设置
 make dev-setup                    # 设置开发环境和权限
@@ -152,49 +160,55 @@ make health-check                 # 项目健康度检查
 
 ### **🧠 智能能力**
 
-#### **MCP工具链集成**
+#### **MCP 工具链集成**
+
 - **sequential-thinking**: 复杂脚本逻辑设计和流程优化
-- **context7**: 动态获取Bash最新文档和最佳实践
-- **memory**: Bash开发经验自动复用和模式库
+- **context7**: 动态获取 Bash 最新文档和最佳实践
+- **memory**: Bash 开发经验自动复用和模式库
 - **filesystem**: 脚本文件结构智能分析和组织
 
 #### **全局规则遵守**
-- **Bash代码规范**: 自动应用ShellCheck规则和Google Shell Style Guide
-- **安全编程**: 避免Shell注入、路径遍历等安全漏洞
+
+- **Bash 代码规范**: 自动应用 ShellCheck 规则和 Google Shell Style Guide
+- **安全编程**: 避免 Shell 注入、路径遍历等安全漏洞
 - **错误处理**: 完善的错误处理和退出码管理
 - **文档规范**: 标准的脚本注释和使用说明
 
-#### **Bash专项智能特性**
+#### **Bash 专项智能特性**
+
 - **函数库设计**: 可复用函数库的设计和管理，模块化架构
-- **参数处理优化**: getopts和长选项处理最佳实践
+- **参数处理优化**: getopts 和长选项处理最佳实践
 - **并发控制**: 后台任务和进程管理优化
-- **跨平台兼容性**: 
-  - Linux/macOS/Windows WSL完全兼容
-  - 自动处理realpath、sed等命令差异
+- **跨平台兼容性**:
+  - Linux/macOS/Windows WSL 完全兼容
+  - 自动处理 realpath、sed 等命令差异
   - 路径分隔符和权限管理跨平台适配
   - 命令存在性检查和降级方案
-- **测试驱动开发**: 
-  - 内置Bash测试框架
+- **测试驱动开发**:
+  - 内置 Bash 测试框架
   - 断言函数和测试报告
   - 持续集成测试支持
-- **智能错误处理**: 
-  - set -euo pipefail最佳实践
+- **智能错误处理**:
+  - set -euo pipefail 最佳实践
   - 统一的错误退出码管理
   - 详细的错误日志和调试信息
 
-### **📋 Bash开发建议**
+### **📋 Bash 开发建议**
 
 #### **开始开发**
+
 1. 描述脚本需求，如："创建系统监控脚本"
 2. 系统会自动设计脚本架构和函数结构
-3. 生成符合最佳实践的Bash代码
+3. 生成符合最佳实践的 Bash 代码
 
 #### **脚本优化**
+
 1. 说明优化目标，如："提高脚本执行效率"
 2. 系统会分析性能瓶颈和优化机会
 3. 提供基于最佳实践的优化方案
 
 #### **错误处理**
+
 1. 描述错误场景，如："网络连接失败处理"
 2. 系统会设计完善的错误处理机制
 3. 确保脚本的健壮性和可靠性
@@ -202,42 +216,48 @@ make health-check                 # 项目健康度检查
 ### **🔧 开发工具集成**
 
 #### **质量保证工具**
-- **ShellCheck**: 静态代码分析和语法检查 (集成在make lint中)
-- **内置测试框架**: Bash原生测试框架，无外部依赖
-- **语法验证**: bash -n语法检查集成
+
+- **ShellCheck**: 静态代码分析和语法检查 (集成在 make lint 中)
+- **内置测试框架**: Bash 原生测试框架，无外部依赖
+- **语法验证**: bash -n 语法检查集成
 - **跨平台验证**: 自动检测和测试多平台兼容性
 
 #### **开发辅助工具**
-- **Make构建系统**: 统一的开发工作流管理
-- **跨平台工具库**: 自动处理平台差异的工具函数
-- **智能路径处理**: realpath替代方案和路径规范化
-- **权限管理**: 自动化脚本权限设置和验证
-- **版本管理**: 基于Git的版本控制和标签管理
 
-#### **测试和CI/CD工具**
+- **Make 构建系统**: 统一的开发工作流管理
+- **跨平台工具库**: 自动处理平台差异的工具函数
+- **智能路径处理**: realpath 替代方案和路径规范化
+- **权限管理**: 自动化脚本权限设置和验证
+- **版本管理**: 基于 Git 的版本控制和标签管理
+
+#### **测试和 CI/CD 工具**
+
 - **内置测试运行器**: ./tests/run-tests.sh
 - **测试报告**: 彩色输出和详细测试结果
-- **健康检查**: make health-check项目状态检查
-- **持续集成**: 适配GitHub Actions和其他CI系统
+- **健康检查**: make health-check 项目状态检查
+- **持续集成**: 适配 GitHub Actions 和其他 CI 系统
 
 #### **部署和分发工具**
+
 - **Make install**: 标准化系统安装
-- **打包系统**: make package创建分发包
+- **打包系统**: make package 创建分发包
 - **依赖检查**: 自动检测和验证系统依赖
-- **多语言文档**: 自动生成中英文README
+- **多语言文档**: 自动生成中英文 README
 
 ### **📈 效率提升**
 
-相比传统Bash开发，智能Claude Autopilot 2.1提供：
-- ⚡ **开发效率**: 提升3-5倍，专注业务逻辑
-- 🎯 **代码质量**: 符合Shell最佳实践的A级代码
+相比传统 Bash 开发，智能 Claude Autopilot 2.1 提供：
+
+- ⚡ **开发效率**: 提升 3-5 倍，专注业务逻辑
+- 🎯 **代码质量**: 符合 Shell 最佳实践的 A 级代码
 - 🔒 **安全保证**: 自动检测和修复安全漏洞
-- 🧠 **模式复用**: Bash惯用法和设计模式自动应用
-- 📚 **文档完善**: 自动生成使用说明和API文档
+- 🧠 **模式复用**: Bash 惯用法和设计模式自动应用
+- 📚 **文档完善**: 自动生成使用说明和 API 文档
 
 ### **🆘 故障排除**
 
 #### **命令不可用**
+
 ```bash
 # 重新加载全局上下文 / Reload Global Context
 /加载全局上下文 --force-refresh
@@ -245,6 +265,7 @@ make health-check                 # 项目健康度检查
 ```
 
 #### **脚本问题**
+
 ```bash
 # 语法检查
 shellcheck script.sh
@@ -258,6 +279,7 @@ chmod +x script.sh
 ```
 
 #### **测试问题**
+
 ```bash
 # 运行单独的测试
 ./tests/run-tests.sh --basic-only      # 仅基础功能测试
@@ -273,6 +295,7 @@ chmod +x tests/*.sh                   # 修复测试脚本权限
 ```
 
 #### **跨平台兼容性问题**
+
 ```bash
 # 检查跨平台工具函数
 source lib/cross-platform-utils.sh
@@ -288,6 +311,7 @@ wsl --version
 ```
 
 #### **构建和依赖问题**
+
 ```bash
 # 检查构建系统
 make --version                        # 检查Make是否安装
@@ -302,6 +326,7 @@ find . -name "*.sh" -exec chmod +x {} \;  # 修复所有脚本权限
 ```
 
 #### **性能问题**
+
 ```bash
 # 性能分析
 time ./bin/main-script               # 基础性能测试
@@ -317,18 +342,18 @@ strace -c ./bin/main-script         # 系统调用统计
 
 ---
 
-## 🚀 **开始Bash智能开发之旅**
+## 🚀 **开始 Bash 智能开发之旅**
 
-智能Claude Autopilot 2.1专为Bash脚本开发优化！
+智能 Claude Autopilot 2.1 专为 Bash 脚本开发优化！
 
 **直接描述您的脚本开发需求**，系统会自动选择最适合的开发模式：
 
-- 功能开发 → 自动应用Shell最佳实践和设计模式
+- 功能开发 → 自动应用 Shell 最佳实践和设计模式
 - 性能优化 → 智能分析脚本性能和系统调用
 - 安全加固 → 基于安全编程规范的代码审查
 - 重构优化 → 模块化和函数库设计
 
-**享受符合GNU编码标准的专业级Bash脚本开发体验！** ✨
+**享受符合 GNU 编码标准的专业级 Bash 脚本开发体验！** ✨
 
 ### **🏗️ 项目快速启动**
 
@@ -360,12 +385,12 @@ make test
 
 ---
 
-**Claude Autopilot路径**: /home/youmisam/claude-autopilot/share/claude-autopilot  
+**Claude Autopilot 路径**: /home/youmisam/claude-autopilot/share/claude-autopilot  
 **项目配置**: .claude/project.json  
-**标准化架构**: GNU编码标准 + FHS规范  
-**测试框架**: 内置Bash测试框架  
+**标准化架构**: GNU 编码标准 + FHS 规范  
+**测试框架**: 内置 Bash 测试框架  
 **跨平台支持**: Linux/macOS/Windows WSL  
 **最后同步**: 2025-07-28 16:31:30  
-**CE版本**: v2.0.0
+**CE 版本**: v2.0.0
 
-*本模板基于Claude Autopilot 2.1标准化重构，遵循GNU编码标准和Unix哲学*
+_本模板基于 Claude Autopilot 2.1 标准化重构，遵循 GNU 编码标准和 Unix 哲学_
